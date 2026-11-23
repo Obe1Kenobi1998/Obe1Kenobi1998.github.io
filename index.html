@@ -16,6 +16,9 @@
   <link rel="stylesheet" href="css/extras.css">
   <link rel="stylesheet" href="css/cta.css">
   <link rel="stylesheet" href="css/theme-light.css">
+  <link rel="stylesheet" href="css/robot.css">
+  <link rel="stylesheet" href="css/slides.css">
+  <link rel="stylesheet" href="css/blocks.css">
 </head>
 <body class="is-loading">
 
@@ -58,7 +61,8 @@
     <a href="#prices">Цены</a>
     <a href="#process">Как работаю</a>
     <a href="#works">Опыт</a>
-    <a href="#calc">Калькулятор</a>
+    <a href="#calc">Конструктор</a>
+    <a href="#service">Сервис</a>
     <a href="#faq">Вопросы</a>
   </nav>
   <a href="#contact" class="btn btn--gold btn--sm magnetic">Обсудить проект</a>
@@ -146,7 +150,7 @@
     </div>
     <div class="offer__right">
       <div class="offer__orbit" aria-hidden="true"><span></span><span></span><span></span></div>
-      <button type="button" class="offer__open magnetic" data-open-plans="sites">
+      <button type="button" class="offer__open" data-open-plans="sites">
         <span class="offer__open-ico" aria-hidden="true">✦</span>
         <b>Выбрать пакет</b>
         <small>сайты и программы</small>
@@ -172,7 +176,8 @@
 
 <!-- ============ ОПЫТ ============ -->
 <section class="section" id="works">
-  <div class="splite reveal">
+  <div class="splite reveal" id="roboCard">
+    <canvas class="robo__canvas" id="roboCanvas" aria-label="3D-робот: сидит и играет с кубиками"></canvas>
     <svg class="splite__spot" viewBox="0 0 3787 2842" fill="none" aria-hidden="true">
       <g filter="url(#spotBlur)">
         <ellipse cx="1924.71" cy="273.501" rx="1924.71" ry="273.501" transform="matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)" fill="#f0cd73" fill-opacity="0.24"></ellipse>
@@ -189,7 +194,8 @@
       <span class="kicker">04 / опыт</span>
       <h2 class="splite__title">Не только сайты</h2>
       <p>Пишу программы для Windows, игры с ИИ-агентами и автоматизацию рутины: Excel, Word, PDF, учёт и отчёты — в одну кнопку. Сайт для меня — разминка.</p>
-      <div class="splite__chips"><i>Python</i><i>C#</i><i>Godot 4</i><i>JavaScript</i><i>HTML / CSS</i><i>Excel · Word · PDF</i></div>
+      <div class="apps" id="apps" role="group" aria-label="Технологии"></div>
+      <p class="apps__hint" id="appsHint">Наведи на значок — робот возьмёт его в руки</p>
       <div class="splite__stats">
         <div><b>5+</b><span>своих программ</span></div>
         <div><b>2</b><span>игры с ИИ</span></div>
@@ -197,8 +203,7 @@
       </div>
       <a href="#contact" class="btn btn--gold magnetic" data-plan="Программа / автоматизация">Нужна программа <span class="arr">→</span></a>
     </div>
-    <div class="splite__scene" id="splineScene">
-      <canvas aria-label="Интерактивный 3D-робот"></canvas>
+    <div class="splite__scene" id="roboScene">
       <div class="splite__loader" aria-hidden="true"></div>
       <div class="splite__fallback" aria-hidden="true">
         <div class="core">
@@ -208,110 +213,172 @@
         </div>
       </div>
     </div>
+    <div class="robo-say" id="roboSay" role="status" aria-live="polite"></div>
+  </div>
+  <div class="works-head reveal">
+    <h3>Примеры программ, которые собираю</h3>
+    <p>Под твою задачу — свой интерфейс, своя логика, один ярлык на рабочем столе.</p>
   </div>
   <div class="works">
     <article class="work work--wide reveal tilt" data-tilt="5">
-      <div class="work__visual v-arena"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="work__shot"><img src="assets/works/sklad.jpg" alt="Интерфейс программы «Склад+ — учёт товаров»" loading="lazy" width="1200" height="750"></div>
       <div class="work__body">
-        <div class="tags"><i>Godot 4</i><i>ИИ-агенты</i><i>3D</i></div>
-        <h3>Evolution Arena</h3>
-        <p>3D-лаборатория: две команды автономных ИИ-агентов добывают ресурсы, исследуют, строят и сражаются. Знания сохраняются между раундами.</p>
+        <span class="work__kind">Windows-программа</span>
+        <h3>Склад+ — учёт товаров</h3>
+        <p>Приход, расход, остатки и подсказка, что пора дозаказать. Отчёт для бухгалтера — в одну кнопку.</p>
+        <div class="tags"><i>Python</i><i>SQLite</i><i>Windows</i></div>
       </div>
     </article>
-    <article class="work reveal tilt" data-tilt="7">
-      <div class="work__visual v-cubes"><b></b><b></b><b></b><b></b></div>
+    <article class="work  reveal tilt" data-tilt="5">
+      <div class="work__shot"><img src="assets/works/reports.jpg" alt="Интерфейс программы «Отчёт за 1 клик»" loading="lazy" width="1200" height="750"></div>
       <div class="work__body">
-        <div class="tags"><i>Godot 4</i><i>Симуляция</i></div>
-        <h3>Cube Lab</h3>
-        <p>Игра-эксперимент в духе «прятки ИИ»: агенты учатся использовать кубы и укрытия.</p>
+        <span class="work__kind">Автоматизация Excel</span>
+        <h3>Отчёт за 1 клик</h3>
+        <p>Перетащил таблицы — программа сама собрала сводку, посчитала итоги и сделала документы по шаблону.</p>
+        <div class="tags"><i>Python</i><i>Excel</i><i>Word</i></div>
       </div>
     </article>
-    <article class="work reveal tilt" data-tilt="7">
-      <div class="work__visual v-map"><em></em><em></em><em></em></div>
+    <article class="work  reveal tilt" data-tilt="5">
+      <div class="work__shot"><img src="assets/works/bot.jpg" alt="Интерфейс программы «Бот-администратор»" loading="lazy" width="1200" height="750"></div>
       <div class="work__body">
-        <div class="tags"><i>Python</i><i>Карты</i><i>EXE</i></div>
-        <h3>Система карт и зон</h3>
-        <p>Настольная программа для организации: интерактивные карты, справочники, поиск, реестры поручений.</p>
+        <span class="work__kind">Telegram-бот</span>
+        <h3>Бот-администратор</h3>
+        <p>Запись к мастеру 24/7: клиент выбирает услугу и время, мастер получает уведомление и напоминание.</p>
+        <div class="tags"><i>Python</i><i>Telegram</i><i>База</i></div>
       </div>
     </article>
-    <article class="work reveal tilt" data-tilt="7">
-      <div class="work__visual v-buffer"><u></u><u></u><u></u></div>
+    <article class="work  reveal tilt" data-tilt="5">
+      <div class="work__shot"><img src="assets/works/finance.jpg" alt="Интерфейс программы «Деньги под контролем»" loading="lazy" width="1200" height="750"></div>
       <div class="work__body">
-        <div class="tags"><i>C#</i><i>Windows</i><i>Сеть</i></div>
-        <h3>Буфер обмена по сети</h3>
-        <p>Утилита для обмена данными между компьютерами локальной сети с восстановлением истории.</p>
+        <span class="work__kind">Учёт финансов</span>
+        <h3>Деньги под контролем</h3>
+        <p>Доходы, расходы и баланс малого бизнеса — с понятными графиками вместо таблицы на 40 вкладок.</p>
+        <div class="tags"><i>C#</i><i>Графики</i><i>Excel</i></div>
       </div>
     </article>
-    <article class="work reveal tilt" data-tilt="7">
-      <div class="work__visual v-phone"><s></s></div>
+    <article class="work  reveal tilt" data-tilt="5">
+      <div class="work__shot"><img src="assets/works/files.jpg" alt="Интерфейс программы «Сортировщик файлов»" loading="lazy" width="1200" height="750"></div>
       <div class="work__body">
-        <div class="tags"><i>Python</i><i>Android</i></div>
-        <h3>Менеджер телефона</h3>
-        <p>Программа для ПК: управление смартфоном, перенос и проверка данных одним окном.</p>
+        <span class="work__kind">Утилита</span>
+        <h3>Сортировщик файлов</h3>
+        <p>Наводит порядок в «Загрузках»: раскладывает по папкам, находит дубликаты и ничего не удаляет без спроса.</p>
+        <div class="tags"><i>Python</i><i>Windows</i></div>
+      </div>
+    </article>
+    <article class="work work--wide reveal tilt" data-tilt="5">
+      <div class="work__shot"><img src="assets/works/crm.jpg" alt="Интерфейс программы «CRM для мастера»" loading="lazy" width="1200" height="750"></div>
+      <div class="work__body">
+        <span class="work__kind">Заявки и клиенты</span>
+        <h3>CRM для мастера</h3>
+        <p>Все заявки на одной доске: новые, смета, в работе, готово. Видно, что горит и кому перезвонить.</p>
+        <div class="tags"><i>JavaScript</i><i>Сайт + база</i></div>
       </div>
     </article>
   </div>
 </section>
 
-<!-- ============ ТОННЕЛЬ: ОТЗЫВЫ / ГАРАНТИИ ============ -->
-<section class="tunnel" id="reviews">
-  <div class="tunnel__sticky">
-    <div class="tunnel__rings" aria-hidden="true"><i></i><i></i><i></i></div>
-    <div class="tunnel__center">
-      <span class="kicker" id="tunnelKicker">05 / гарантии</span>
-      <h2 class="tunnel__title" id="tunnelTitle">Почему со мной <span class="shine">спокойно</span></h2>
-      <p id="tunnelSub">Листай — карточки летят навстречу.</p>
-    </div>
-    <div class="tunnel__stage" id="tunnelStage"></div>
-    <div class="tunnel__hint" aria-hidden="true">Листай</div>
+<!-- ============ ГАРАНТИИ / ОТЗЫВЫ: СЛАЙД-ШОУ ============ -->
+<section class="section flow-sec" id="reviews">
+  <div class="section__head section__head--center reveal">
+    <span class="kicker" id="flowKicker">05 / гарантии</span>
+    <h2 id="flowTitle">Почему со мной <span class="shine">спокойно</span></h2>
+    <p id="flowSub">Карточки листаются сами. Можно потянуть или нажать стрелку.</p>
   </div>
+  <div class="flow reveal" id="flow" tabindex="0" role="region" aria-roledescription="карусель" aria-label="Гарантии">
+    <div class="flow__stage" id="flowStage"></div>
+    <button class="flow__nav flow__nav--prev" type="button" aria-label="Предыдущая карточка">‹</button>
+    <button class="flow__nav flow__nav--next" type="button" aria-label="Следующая карточка">›</button>
+  </div>
+  <div class="flow__dots" id="flowDots" role="tablist" aria-label="Выбор карточки"></div>
 </section>
 
-<!-- ============ КАЛЬКУЛЯТОР ============ -->
+<!-- ============ КОНСТРУКТОР ПРОЕКТА ============ -->
 <section class="section" id="calc">
-  <div class="section__head reveal">
-    <span class="kicker">06 / калькулятор</span>
-    <h2>Посчитай свой сайт за 10 секунд</h2>
+  <div class="bld-head reveal">
+    <svg class="pcalc" viewBox="0 0 120 160" aria-hidden="true">
+        <defs><linearGradient id="pcB" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2b2b30"/><stop offset="1" stop-color="#111114"/></linearGradient>
+        <linearGradient id="pcL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe3b0"/><stop offset="1" stop-color="#9fbf7c"/></linearGradient></defs>
+        <rect x="4" y="4" width="112" height="152" rx="16" fill="url(#pcB)" stroke="#d4a84b" stroke-width="2"/>
+        <rect x="14" y="14" width="92" height="38" rx="6" fill="url(#pcL)"/>
+        <text x="20" y="27" class="pcalc__fx">f(x)=Σ</text>
+        <text x="100" y="45" text-anchor="end" class="pcalc__lcd" id="pcalcLcd">0</text>
+        <g class="pcalc__keys">
+          <rect x="14" y="62" width="19" height="13" rx="4"/><rect x="38" y="62" width="19" height="13" rx="4"/><rect x="62" y="62" width="19" height="13" rx="4"/><rect x="86" y="62" width="20" height="13" rx="4" class="g"/>
+          <rect x="14" y="81" width="19" height="13" rx="4"/><rect x="38" y="81" width="19" height="13" rx="4" class="k1"/><rect x="62" y="81" width="19" height="13" rx="4"/><rect x="86" y="81" width="20" height="13" rx="4" class="g"/>
+          <rect x="14" y="100" width="19" height="13" rx="4"/><rect x="38" y="100" width="19" height="13" rx="4"/><rect x="62" y="100" width="19" height="13" rx="4" class="k2"/><rect x="86" y="100" width="20" height="13" rx="4" class="g"/>
+          <rect x="14" y="119" width="19" height="13" rx="4" class="k3"/><rect x="38" y="119" width="19" height="13" rx="4"/><rect x="62" y="119" width="19" height="13" rx="4"/><rect x="86" y="119" width="20" height="32" rx="4" class="g k4"/>
+          <rect x="14" y="138" width="67" height="13" rx="4"/>
+        </g>
+        <text x="22" y="72" class="pcalc__t">f</text><text x="45" y="72" class="pcalc__t">x²</text><text x="68" y="72" class="pcalc__t">√</text><text x="92" y="72" class="pcalc__t d">÷</text>
+        <text x="93" y="138" class="pcalc__t d">=</text>
+      </svg>
+    <div>
+      <span class="kicker">06 / конструктор</span>
+      <h2>Собери проект — цена посчитается сама</h2>
+      <p>Перетащи модули на поле: они сами соединятся линиями. Можно связать и вручную — потяни от точки к другому модулю.</p>
+    </div>
   </div>
-  <div class="calc reveal">
-    <div class="calc__opts">
-      <div class="calc__group">
-        <span class="calc__label">Тип сайта</span>
-        <div class="seg" id="calcType">
-          <button type="button" data-v="5000" class="on">Визитка</button>
-          <button type="button" data-v="7500">Лендинг</button>
-          <button type="button" data-v="9000">Каталог</button>
-        </div>
-      </div>
-      <div class="calc__group">
-        <span class="calc__label">Что добавить</span>
-        <label class="chk"><input type="checkbox" data-v="1000"><span></span>Галерея работ</label>
-        <label class="chk"><input type="checkbox" data-v="1000"><span></span>Форма заявки в мессенджер</label>
-        <label class="chk"><input type="checkbox" data-v="1500"><span></span>Квиз / калькулятор для клиентов</label>
-        <label class="chk"><input type="checkbox" data-v="1000"><span></span>Тексты напишу я</label>
-        <label class="chk"><input type="checkbox" data-v="1500"><span></span>Домен + хостинг + настройка «под ключ»</label>
-      </div>
-      <div class="calc__group">
-        <span class="calc__label">Срок</span>
-        <div class="seg" id="calcSpeed">
-          <button type="button" data-k="1" class="on">Обычный</button>
-          <button type="button" data-k="1.3">Срочно (2 дня)</button>
-        </div>
-      </div>
+  <div class="bld reveal" id="bld">
+    <aside class="bld__pal" id="bldPal" aria-label="Модули"></aside>
+    <div class="bld__field" id="bldField">
+      <canvas class="bld__bin" id="bldBin" aria-hidden="true"></canvas>
+      <svg class="bld__wires" id="bldWires" aria-hidden="true"></svg>
+      <div class="bld__nodes" id="bldNodes"></div>
+      <div class="bld__empty" id="bldEmpty"><b>Поле пустое</b>Перетащи сюда модуль или нажми на него слева.<br>Например: Python + Excel</div>
+      <div class="bld__tools" id="bldPresets"></div>
     </div>
-    <div class="calc__result">
-      <span>Примерная стоимость</span>
-      <b id="calcSum">5 000 ₽</b>
-      <small id="calcNote">Точную цену назову после 5 минут разговора.</small>
-      <a href="#contact" class="btn btn--gold btn--block magnetic" id="calcSend">Отправить расчёт</a>
+    <div class="bld__sum">
+      <div class="bld__lcd">
+        <small>ИТОГО ≈</small>
+        <b id="bldTotal">0 ₽</b>
+        <span id="bldDays">срок — добавь модули</span>
+      </div>
+      <ul class="bld__list" id="bldList"></ul>
+      <label class="bld__urgent"><input type="checkbox" id="bldUrgent"><span></span>Срочно <em>×1,3, срок короче</em></label>
+      <button type="button" class="btn btn--gold btn--block" id="bldSend" disabled>Отправить схему <span class="arr">→</span></button>
+      <p class="bld__note">Цена ориентировочная, точную назову после разговора.</p>
     </div>
+  </div>
+</section>
+
+<!-- ============ ОПЛАТА ============ -->
+<section class="section" id="pay">
+  <div class="section__head reveal">
+    <span class="kicker">07 / оплата</span>
+    <h2>Как платить — честно и удобно</h2>
+    <p>Никаких 100% вперёд за «кота в мешке». Платишь за то, что уже видишь.</p>
+  </div>
+  <div class="pay" id="payCards"></div>
+  <div class="pay__methods reveal" id="payMethods"></div>
+</section>
+
+<!-- ============ СЕРВИСНЫЙ ЦЕНТР ============ -->
+<section class="svc" id="service">
+  <div class="svc__inner">
+    <div class="svc__head reveal">
+      <div class="svc__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Сервисный центр</div>
+      <span class="kicker">08 / сервис</span>
+      <h2>Комп тормозит или глючит? <span>Проверь сам — бесплатно</span></h2>
+      <p>Проверенные утилиты от официальных разработчиков. Кнопка «Скачать» сразу качает файл — без регистраций и переходов на чужие сайты.</p>
+      <div class="svc__status"><i></i><span id="svcStatus">Ссылки проверены</span></div>
+    </div>
+    <div class="svc__steps reveal">
+      <div><b>1</b>Выбери проблему</div><div><b>2</b>Скачай утилиту</div><div><b>3</b>Не помогло — напиши мне</div>
+    </div>
+    <div class="svc__filters reveal" id="svcFilters" role="tablist" aria-label="Категории"></div>
+    <div class="svc__grid" id="svcGrid"></div>
+    <div class="svc__cta reveal">
+      <p>Не разобрался или нужна программа под твою задачу? Опиши проблему — подскажу, что делать.</p>
+      <a href="#contact" class="btn btn--svc" data-plan="Помощь с компьютером">Написать мастеру <span class="arr">→</span></a>
+    </div>
+    <p class="svc__legal">Все программы бесплатные для домашнего использования и принадлежат своим разработчикам. Ссылки ведут на файлы с их официальных серверов.</p>
   </div>
 </section>
 
 <!-- ============ FAQ ============ -->
 <section class="section" id="faq">
   <div class="section__head reveal">
-    <span class="kicker">07 / вопросы</span>
+    <span class="kicker">09 / вопросы</span>
     <h2>Частые вопросы</h2>
   </div>
   <div class="faq">
@@ -327,7 +394,7 @@
 <section class="cta" id="contact">
   <div class="cta__glow" aria-hidden="true"></div>
   <div class="cta__inner">
-    <span class="kicker reveal">08 / связь</span>
+    <span class="kicker reveal">10 / связь</span>
     <h2 class="cta__title reveal">Расскажи о своём деле —<br><span class="cta__mark">остальное сделаю я<svg viewBox="0 0 420 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16 C 90 6, 200 4, 416 12" pathLength="1"/></svg></span></h2>
     <p class="cta__sub reveal">Опиши задачу одной строкой. Отвечаю сам, обычно в течение часа — без менеджеров и «мы вам перезвоним».</p>
     <div class="cta__btns reveal">
@@ -365,12 +432,16 @@
 <script src="js/config.js"></script>
 <script src="js/background.js"></script>
 <script src="js/folders.js"></script>
-<script src="js/tunnel.js"></script>
+<script src="js/slides.js"></script>
 <script src="js/app.js"></script>
 <script src="js/plans.js"></script>
 <script src="js/contact.js"></script>
 <script src="js/crowd.js"></script>
 <script src="js/glow.js"></script>
-<script src="js/spline.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/robot.js"></script>
+<script src="js/builder.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/service.js"></script>
 </body>
 </html>

@@ -90,36 +90,7 @@
     toast("«" + a.getAttribute("data-plan") + "» — добавлено в заявку 👇", "ok");
   });
 
-  /* ---------- калькулятор ---------- */
-  var sumEl = $("#calcSum"), shown = 5000;
-  function fmt(n) { return n.toLocaleString("ru-RU").replace(/ /g, " ") + " ₽"; }
-  function calc() {
-    var base = +$("#calcType .on").getAttribute("data-v");
-    $$("#calc .chk input:checked").forEach(function (c) { base += +c.getAttribute("data-v"); });
-    var total = Math.round(base * +$("#calcSpeed .on").getAttribute("data-k") / 500) * 500;
-    var from = shown, t0 = performance.now();
-    (function step(t) {
-      var k = Math.min(1, (t - t0) / 500), e = 1 - Math.pow(1 - k, 3);
-      shown = Math.round(from + (total - from) * e);
-      sumEl.textContent = fmt(shown);
-      if (k < 1) requestAnimationFrame(step);
-    })(t0);
-    calc.total = total;
-  }
-  $$("#calc .seg").forEach(function (seg) {
-    seg.addEventListener("click", function (e) {
-      var b = e.target.closest("button"); if (!b) return;
-      $$("button", seg).forEach(function (x) { x.classList.toggle("on", x === b); });
-      calc();
-    });
-  });
-  $$("#calc .chk input").forEach(function (c) { c.addEventListener("change", calc); });
-  $("#calcSend").addEventListener("click", function () {
-    var opts = $$("#calc .chk input:checked").map(function (c) { return c.parentNode.textContent.trim(); });
-    setPlan("Расчёт: " + $("#calcType .on").textContent + (opts.length ? " + " + opts.join(", ") : "") +
-      ", срок — " + $("#calcSpeed .on").textContent.toLowerCase() + " ≈ " + fmt(calc.total || 5000));
-    toast("Расчёт добавлен в заявку 👇", "ok");
-  });
+  /* калькулятор переехал в js/builder.js (конструктор проекта) */
 
   /* ---------- меню ---------- */
   var nav = $("#nav");
