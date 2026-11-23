@@ -1,0 +1,156 @@
+/* =====================================================================
+   ТЁПЛАЯ СВЕТЛАЯ ТЕМА — подключается последней и перекрашивает сайт.
+   Тёмными оставлены как акценты: CMD-строка, окно кода, терминал
+   заставки и «экраны» в карточках проектов.
+   ===================================================================== */
+:root{
+  --bg:#f7f3ec; --bg2:#f1ebe1; --p1:#fffdf9; --p2:#f5efe5; --p3:#ece4d7;
+  --line:#e6ddcd; --line2:#d5c9b4;
+  --tx:#1e1a15; --tx2:#5c5448; --tx3:#8a7f6f;
+  --gold:#c39233; --gold2:#e6bf62; --gold-ink:#94681a;
+  --shadow:0 18px 50px rgba(92,70,30,.10), 0 2px 6px rgba(92,70,30,.06);
+}
+/* тёмные «островки» — свои токены */
+.ticker,.code-win,.boot__win,.work__visual,.tcard--promise:nth-child(3n){
+  --line:#2a2f38; --line2:#353b46; --tx:#e9ebee; --tx2:#a1a9b4; --tx3:#6f7884; --p1:#171a20; --p2:#1d2128;
+}
+
+html{color-scheme:light}
+body{background:var(--bg);color:var(--tx)}
+::selection{background:#f0d58f;color:#1e1a15}
+
+/* ---------- фон ---------- */
+.bg{background:var(--bg)}
+.a1{background:radial-gradient(circle,rgba(230,191,98,.38),transparent 65%);opacity:.55}
+.a2{background:radial-gradient(circle,rgba(150,190,230,.22),transparent 65%);opacity:.5}
+.a3{background:radial-gradient(circle,rgba(240,205,115,.3),transparent 65%);opacity:.5}
+.bg__grid{background-image:linear-gradient(rgba(90,65,25,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(90,65,25,.055) 1px,transparent 1px)}
+.bg__noise{opacity:.035}
+.cursor-glow{background:radial-gradient(circle,rgba(230,191,98,.18),transparent 60%)}
+
+/* ---------- заставка: светлый фон, тёмный терминал ---------- */
+.boot{background:radial-gradient(ellipse at center,#fffaf1 0%,#efe6d6 75%)}
+.boot__win{box-shadow:0 30px 80px rgba(92,70,30,.25),0 0 0 1px rgba(0,0,0,.4)}
+.boot__bar{background:#171a20;border-color:#2a2f38}
+.boot__skip{background:rgba(255,255,255,.7)}
+
+/* ---------- шапка ---------- */
+.nav{background:rgba(255,252,246,.72);border-color:rgba(120,90,40,.12);box-shadow:0 6px 24px rgba(92,70,30,.06)}
+.nav.scrolled{background:rgba(255,252,246,.92);box-shadow:0 12px 40px rgba(92,70,30,.12)}
+.nav__links a:hover,.nav__links a.active{background:rgba(120,90,40,.08)}
+.brand__mark{box-shadow:0 4px 16px rgba(195,146,51,.35),inset 0 1px 0 rgba(255,255,255,.5)}
+@media (max-width:980px){ .nav__links{background:rgba(255,252,246,.98);box-shadow:0 20px 50px rgba(92,70,30,.18)} }
+
+/* ---------- общие элементы ---------- */
+.kicker{color:var(--gold-ink)}
+.shine{background:linear-gradient(100deg,#8f6417 0%,#b8862c 30%,#dba847 45%,#b8862c 60%,#8f6417 100%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn--gold{background:linear-gradient(135deg,#f0cd73,#d4a84b);box-shadow:0 8px 24px rgba(195,146,51,.32),inset 0 1px 0 rgba(255,255,255,.55)}
+.btn--gold:hover{box-shadow:0 12px 34px rgba(195,146,51,.45),inset 0 1px 0 rgba(255,255,255,.6)}
+.btn--ghost{background:rgba(255,255,255,.65);border-color:var(--line2)}
+.btn--ghost:hover{background:#fff;border-color:var(--gold)}
+.pill{background:rgba(255,255,255,.7);border-color:var(--line)}
+.toast{background:#fffdf9;box-shadow:0 20px 50px rgba(92,70,30,.18)}
+.dot--ok{background:#3aa872}
+
+/* ---------- первый экран ---------- */
+.code-win{background:#14161b;border-color:rgba(0,0,0,.2);box-shadow:0 40px 90px rgba(60,45,20,.28),0 0 0 1px rgba(0,0,0,.25)}
+.code-win__body .a{color:#f0cd73}
+.float-card{background:rgba(255,253,249,.92);border-color:rgba(120,90,40,.14);box-shadow:var(--shadow)}
+.fc__ico{background:rgba(195,146,51,.14);color:var(--gold-ink)}
+.scroll-hint{border-color:var(--line2)}
+
+/* ---------- бегущие ниши ---------- */
+.marquee{background:rgba(255,253,249,.75);border-color:var(--line)}
+.marquee span{-webkit-text-stroke:1px #c9bca4}
+.marquee i{color:var(--gold)}
+
+/* ---------- папки ---------- */
+.gf-desk-wrap::before{opacity:.18}
+
+/* ---------- витрина цен ---------- */
+.offer{background:radial-gradient(ellipse 60% 90% at 85% 50%,rgba(230,191,98,.22),transparent 60%),linear-gradient(160deg,#fffdf9,#f6efe3 70%);box-shadow:var(--shadow)}
+.offer::after{border-color:rgba(120,90,40,.1)}
+.offer__chip{background:rgba(255,255,255,.75)}
+.offer__chip:hover{background:#fff}
+.offer__chip--hot{background:rgba(230,191,98,.14)}
+.offer__orbit span{border-color:rgba(195,146,51,.3)}
+
+/* ---------- шаги ---------- */
+.step__n{color:var(--gold-ink);background:#fffdf9;box-shadow:0 8px 24px rgba(195,146,51,.15)}
+
+/* ---------- опыт ---------- */
+.splite{background:radial-gradient(ellipse 70% 90% at 80% 60%,rgba(230,191,98,.16),transparent 60%),linear-gradient(160deg,#fffdf9,#f3ebde);border-color:rgba(120,90,40,.12);box-shadow:var(--shadow)}
+.splite::after{background-image:linear-gradient(rgba(90,65,25,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(90,65,25,.05) 1px,transparent 1px)}
+.splite__title{background:linear-gradient(180deg,#1e1a15 20%,#6e5320 75%,#a07626);-webkit-background-clip:text;background-clip:text;color:transparent}
+.splite__chips i{background:rgba(255,255,255,.8)}
+.splite__stats b{color:var(--gold-ink)}
+.core__ring{border-color:rgba(195,146,51,.4)}
+.core__ring--2{border-color:rgba(120,90,40,.12)}
+.core__ring i{background:#fffdf9;color:var(--gold-ink);box-shadow:0 4px 12px rgba(92,70,30,.08)}
+@media (max-width:980px){ .splite__scene{border-top-color:rgba(120,90,40,.1)} }
+.work{background:#fffdf9;box-shadow:var(--shadow)}
+.work:hover{border-color:rgba(195,146,51,.5)}
+.tags i{color:var(--gold-ink);background:rgba(195,146,51,.1);border-color:rgba(195,146,51,.25)}
+
+/* ---------- тоннель ---------- */
+.tunnel__title{background:linear-gradient(180deg,#1e1a15 25%,#8a7f6f 115%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tunnel__rings i{border-color:rgba(195,146,51,.28)}
+.tunnel__rings i:nth-child(1){background:radial-gradient(circle,rgba(230,191,98,.14),transparent 70%)}
+.tcard{background:linear-gradient(165deg,#fffdf9,#f4ede1);border-color:rgba(120,90,40,.14);box-shadow:0 26px 60px rgba(92,70,30,.18),inset 0 1px 0 #fff;color:var(--tx)}
+.tcard::before{background:radial-gradient(ellipse 90% 60% at 0% 0%,rgba(230,191,98,.22),transparent 60%)}
+.tcard--promise:nth-child(3n+2){background:linear-gradient(165deg,#f3d58a,#d9ac4f);border-color:rgba(150,110,30,.35);color:#1e1a15}
+.tcard--promise:nth-child(3n+2) .tcard__text{color:#4a3a18}
+.tcard--promise:nth-child(3n+2) .tcard__ico{background:#1e1a15;color:#f0cd73}
+.tcard--promise:nth-child(3n+2) .tcard__no{color:#6e5320}
+.tcard--promise:nth-child(3n){background:linear-gradient(165deg,#24272e,#14161b);border-color:rgba(0,0,0,.3);color:#e9ebee}
+.tcard--promise:nth-child(3n) .tcard__text{color:#a1a9b4}
+.tcard--promise:nth-child(3n) .tcard__ico{background:linear-gradient(135deg,#f0cd73,#d4a84b);color:#16120a}
+.tcard__stars{color:#d29c2c}
+.tcard--review .tcard__text{color:var(--tx)}
+
+/* ---------- калькулятор ---------- */
+.calc{background:rgba(255,253,249,.9);box-shadow:var(--shadow)}
+.seg{background:var(--bg2)}
+.seg button.on{background:linear-gradient(135deg,#f0cd73,#d4a84b)}
+.chk span{background:#fff}
+.calc__result{background:radial-gradient(ellipse at 30% 0%,rgba(230,191,98,.3),transparent 60%),#fffaf0;border-color:rgba(195,146,51,.35)}
+
+/* ---------- вопросы ---------- */
+.faq details{background:rgba(255,253,249,.92);box-shadow:0 4px 14px rgba(92,70,30,.05)}
+.faq details[open]{border-color:rgba(195,146,51,.45)}
+.faq summary::after{background:var(--p2);color:var(--gold-ink)}
+
+/* ---------- блок «Связь» ---------- */
+.cta{background:linear-gradient(180deg,#f3ece0,#f7f3ec 55%,#efe7d9);border-top-color:var(--line)}
+.cta__glow{background:radial-gradient(ellipse at center,rgba(230,191,98,.32),rgba(230,191,98,.08) 45%,transparent 70%)}
+.cta__mark path{stroke:#d4a84b;filter:drop-shadow(0 2px 6px rgba(195,146,51,.35))}
+.cta__play{background:rgba(195,146,51,.16);color:var(--gold-ink)}
+.cta__bar{background:#fffdf9;border-color:var(--line2);box-shadow:0 20px 50px rgba(92,70,30,.14),inset 0 1px 0 #fff}
+.cta__bar:focus-within{box-shadow:0 20px 50px rgba(92,70,30,.14),0 0 0 4px rgba(195,146,51,.18)}
+.cta__caret{background:var(--gold)}
+.cta__chip{box-shadow:0 6px 16px rgba(92,70,30,.2)}
+.channel{background:#fffdf9;border-color:var(--line2)}
+
+/* ---------- окно пакетов и «куда отправить» ---------- */
+.pm__backdrop{background:rgba(60,45,20,.32)}
+.pm__panel{background:#fffdf9;border-color:rgba(120,90,40,.12);box-shadow:0 40px 120px rgba(60,45,20,.3)}
+.pm__close:hover{background:rgba(120,90,40,.08)}
+.pm__tabs{background:var(--bg2)}
+.pm__tabs button.on{background:#fff;box-shadow:0 2px 8px rgba(92,70,30,.12)}
+.pm__card{background:#fff;box-shadow:0 6px 20px rgba(92,70,30,.06)}
+.pm__card--hot{background:linear-gradient(180deg,rgba(230,191,98,.2),#fff 45%);border-color:rgba(195,146,51,.6)}
+.pm__card--focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(195,146,51,.2)}
+.pm__price--text b,.pm__card li svg,.pm__link{color:var(--gold-ink)}
+.sheet__msg{background:var(--bg2)}
+.sheet__opt{background:#fff}
+.sheet__opt:hover,.sheet__opt:focus-visible{background:#fffaf0}
+
+/* ---------- подвал ---------- */
+.footer__big{-webkit-text-stroke:1px #cdbfa6;background-image:linear-gradient(90deg,#b8862c,#e6bf62)}
+.to-top:hover{color:var(--gold-ink)}
+
+/* ---------- прожектор за курсором ---------- */
+.sg{background:radial-gradient(240px circle at var(--gx) var(--gy),hsl(var(--hue) 85% 55% / .09),transparent 70%)}
+.sg::before{background:radial-gradient(170px circle at var(--gx) var(--gy),hsl(var(--hue) 85% 48% / 1),transparent 100%);filter:none}
+.sg::after{background:radial-gradient(110px circle at var(--gx) var(--gy),hsl(45 100% 70% / .9),transparent 100%)}
+.sg__outer{opacity:.35}

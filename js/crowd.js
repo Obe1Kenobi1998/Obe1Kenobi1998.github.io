@@ -12,9 +12,10 @@
   var INK = "#0c0e11", SKIN, GOLD, PAPER;
   // задние ряды — темнее (как в тумане), но непрозрачные, чтобы не просвечивали друг сквозь друга
   var TONES = [
-    { skin: "#6f6c66", paper: "#77736c", gold: "#7d6533" },
-    { skin: "#aaa69d", paper: "#b3aea3", gold: "#a5843f" },
-    { skin: "#ece8df", paper: "#f6f1e7", gold: "#d4a84b" }
+    // светлая тема: задние ряды бледнеют, как в дымке, линии светлее
+    { ink: "#b9ad9a", skin: "#f3ede3", paper: "#efe8dc", gold: "#ead3a0" },
+    { ink: "#6f6556", skin: "#faf6ef", paper: "#f6f0e6", gold: "#e2bd6c" },
+    { ink: "#1e1a15", skin: "#fffdf8", paper: "#fffaf2", gold: "#d4a84b" }
   ];
 
   var seed = 20261123;
@@ -25,7 +26,7 @@
   // ---------------------------------------------------------- один человечек
   // начало координат — середина низа, рисуем вверх (y < 0)
   function person(tone) {
-    SKIN = tone.skin; PAPER = tone.paper; GOLD = tone.gold;
+    INK = tone.ink; SKIN = tone.skin; PAPER = tone.paper; GOLD = tone.gold;
     var out = [], st = 'stroke="' + INK + '" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"';
     var shirt = pick(["plain", "stripes", "v", "hoodie", "dots", "gold", "tie", "plain"]);
     var shirtFill = shirt === "gold" ? GOLD : PAPER;

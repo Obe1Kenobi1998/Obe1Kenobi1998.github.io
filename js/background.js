@@ -41,16 +41,16 @@
       for (var j = i + 1; j < pts.length; j++) {
         var q = pts[j], ex = p.x - q.x, ey = p.y - q.y, e2 = ex * ex + ey * ey;
         if (e2 < link2) {
-          ctx.strokeStyle = "rgba(212,168,75," + (1 - e2 / link2) * .16 + ")";
+          ctx.strokeStyle = "rgba(160,118,40," + (1 - e2 / link2) * .2 + ")";
           ctx.lineWidth = 1;
           ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
         }
       }
       if (d2 < 32000) {
-        ctx.strokeStyle = "rgba(240,205,115," + (1 - d2 / 32000) * .45 + ")";
+        ctx.strokeStyle = "rgba(195,146,51," + (1 - d2 / 32000) * .5 + ")";
         ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
       }
-      ctx.fillStyle = p.g ? "rgba(240,205,115,.95)" : "rgba(233,235,238,.5)";
+      ctx.fillStyle = p.g ? "rgba(195,146,51,.85)" : "rgba(70,55,35,.28)";
       ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill();
     }
     requestAnimationFrame(frame);

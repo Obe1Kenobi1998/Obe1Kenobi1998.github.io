@@ -1,7 +1,9 @@
 /* =====================================================================
    1. ПРОЖЕКТОР ЗА КУРСОРОМ (Spotlight Card, @jahed) — палитра сайта
    ===================================================================== */
-.sg-host{position:relative;--gx:-9999px;--gy:-9999px;--hue:42}
+/* :where() — нулевая специфичность: absolute/fixed у самих блоков (летающие карточки) не перебивается */
+:where(.sg-host){position:relative}
+.sg-host{--gx:-9999px;--gy:-9999px;--hue:42}
 .faq details.sg-host{position:relative}
 .sg{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;
   background:radial-gradient(240px circle at var(--gx) var(--gy),hsl(var(--hue) 90% 62% / .075),transparent 70%)}
