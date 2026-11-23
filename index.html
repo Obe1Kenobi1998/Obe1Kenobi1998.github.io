@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>НЕМЕЦ — сайты под ключ</title>
+  <meta name="description" content="Сайты-визитки, лендинги и программы под ключ. Быстро, красиво, с адаптацией под телефон. От 5 000 ₽.">
+  <meta name="theme-color" content="#0c0e11">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Caveat:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sections.css">
+  <link rel="stylesheet" href="css/folders.css">
+  <link rel="stylesheet" href="css/extras.css">
+  <link rel="stylesheet" href="css/cta.css">
+</head>
+<body class="is-loading">
+
+<!-- ============ ЗАСТАВКА ============ -->
+<div class="boot" id="boot" aria-hidden="true">
+  <div class="boot__win">
+    <div class="boot__bar"><i></i><i></i><i></i><span>dev@terminal: ~/portfolio</span></div>
+    <pre class="boot__log" id="bootLog"></pre>
+    <div class="boot__progress"><span id="bootBar"></span></div>
+  </div>
+  <button class="boot__skip" id="bootSkip" type="button">Пропустить ›</button>
+</div>
+
+<!-- ============ ФОН ============ -->
+<div class="bg" aria-hidden="true">
+  <canvas id="net"></canvas>
+  <div class="bg__aurora a1"></div>
+  <div class="bg__aurora a2"></div>
+  <div class="bg__aurora a3"></div>
+  <div class="bg__grid"></div>
+  <div class="bg__noise"></div>
+</div>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<!-- ============ CMD-СТРОКА ============ -->
+<div class="ticker" aria-label="Цитаты">
+  <div class="ticker__prompt">C:\DEV&gt;<span class="blink">_</span></div>
+  <div class="ticker__viewport"><div class="ticker__track" id="tickerTrack"></div></div>
+</div>
+
+<!-- ============ ШАПКА ============ -->
+<header class="nav" id="nav">
+  <a href="#top" class="brand">
+    <span class="brand__mark"><span>&gt;_</span></span>
+    <span class="brand__text"><b data-site="name">НЕМЕЦ</b><small data-site="role">веб-разработчик</small></span>
+  </a>
+  <nav class="nav__links" id="navLinks">
+    <a href="#services">Услуги</a>
+    <a href="#prices">Цены</a>
+    <a href="#process">Как работаю</a>
+    <a href="#works">Опыт</a>
+    <a href="#calc">Калькулятор</a>
+    <a href="#faq">Вопросы</a>
+  </nav>
+  <a href="#contact" class="btn btn--gold btn--sm magnetic">Обсудить проект</a>
+  <button class="nav__burger" id="burger" aria-label="Меню" type="button"><span></span><span></span></button>
+</header>
+
+<main id="top">
+
+<!-- ============ ГЕРОЙ ============ -->
+<section class="hero">
+  <div class="hero__left">
+    <div class="pill reveal"><span class="dot dot--ok"></span>Принимаю заказы · ноябрь 2026</div>
+    <h1 class="hero__title reveal">
+      <span class="line">Сайты, от которых</span>
+      <span class="line shine">захватывает дух</span>
+    </h1>
+    <p class="hero__sub reveal">
+      Делаю современные сайты <span class="typer" id="typer">для мастеров маникюра</span><span class="caret">|</span><br>
+      Быстро, красиво, под телефон — и с кнопкой, по которой клиенты реально пишут.
+    </p>
+    <div class="hero__cta reveal">
+      <a href="#contact" class="btn btn--gold btn--lg magnetic">Хочу такой сайт <span class="arr">→</span></a>
+      <a href="#prices" class="btn btn--ghost btn--lg magnetic" data-open-plans="sites">Смотреть цены</a>
+    </div>
+    <div class="stats reveal">
+      <div class="stat"><b data-count="5000" data-suffix=" ₽">0</b><span>стартовая цена</span></div>
+      <div class="stat"><b data-count="3" data-prefix="от " data-suffix=" дней">0</b><span>до запуска</span></div>
+      <div class="stat"><b data-count="100" data-suffix="%">0</b><span>адаптив под телефон</span></div>
+    </div>
+  </div>
+
+  <div class="hero__right reveal">
+    <div class="code-win tilt" data-tilt="8">
+      <div class="code-win__bar"><i></i><i></i><i></i><span>index.html</span><em class="live"><span class="dot dot--ok"></span>live</em></div>
+      <pre class="code-win__body"><code id="codeTyper"></code></pre>
+    </div>
+    <div class="float-card fc1 tilt" data-tilt="14">
+      <span class="fc__ico">⚡</span><div><b>98 / 100</b><small>скорость загрузки</small></div>
+    </div>
+    <div class="float-card fc2 tilt" data-tilt="14">
+      <span class="fc__ico">📱</span><div><b>Новая заявка</b><small>«Хочу записаться на пятницу»</small></div>
+    </div>
+    <div class="float-card fc3 tilt" data-tilt="14">
+      <span class="fc__ico">★</span><div><b>Под ключ</b><small>домен · хостинг · Яндекс</small></div>
+    </div>
+  </div>
+
+  <a href="#services" class="scroll-hint" aria-label="Листать вниз"><span></span></a>
+</section>
+
+<!-- ============ БЕГУЩИЕ НИШИ ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track">
+    <span>Маникюр</span><i>✦</i><span>Автосервис</span><i>✦</i><span>Детейлинг</span><i>✦</i><span>Ремонт квартир</span><i>✦</i><span>Репетиторы</span><i>✦</i><span>Фотографы</span><i>✦</i><span>Кондитеры</span><i>✦</i><span>Флористы</span><i>✦</i><span>Барбершопы</span><i>✦</i><span>Кафе</span><i>✦</i>
+    <span>Маникюр</span><i>✦</i><span>Автосервис</span><i>✦</i><span>Детейлинг</span><i>✦</i><span>Ремонт квартир</span><i>✦</i><span>Репетиторы</span><i>✦</i><span>Фотографы</span><i>✦</i><span>Кондитеры</span><i>✦</i><span>Флористы</span><i>✦</i><span>Барбершопы</span><i>✦</i><span>Кафе</span><i>✦</i>
+  </div>
+</div>
+
+<!-- ============ УСЛУГИ: СТЕКЛЯННЫЕ ПАПКИ ============ -->
+<section class="section" id="services">
+  <div class="section__head reveal">
+    <span class="kicker">01 / услуги</span>
+    <h2>Что я делаю</h2>
+    <p>Визитка — от 5 000 ₽, лендинг — от 7 500 ₽, программы — по задаче. Открой папку и посмотри, что внутри.</p>
+  </div>
+
+  <div class="gf-desk-wrap">
+    <div class="gf-desk" id="folderDesk"></div>
+    <p class="gf-hint">Наведи — наклонится · Нажми — откроется · + — добавить</p>
+  </div>
+</section>
+
+<!-- ============ ЦЕНЫ: ВИТРИНА, ПАКЕТЫ ОТКРЫВАЮТСЯ ПОВЕРХ СТРАНИЦЫ ============ -->
+<section class="section" id="prices">
+  <div class="offer reveal">
+    <div class="offer__left">
+      <span class="kicker">02 / цены</span>
+      <h2>Сайт под ключ<br><span class="shine">от&nbsp;5&nbsp;000&nbsp;₽</span></h2>
+      <p>Три понятных пакета, цена фиксируется до старта. Никаких «ой, тут ещё доплатить».</p>
+      <div class="offer__chips">
+        <button type="button" class="offer__chip" data-open-plans="sites" data-focus="Старт"><b>Старт</b><span>5 000 ₽</span></button>
+        <button type="button" class="offer__chip offer__chip--hot" data-open-plans="sites" data-focus="Бизнес"><b>Бизнес</b><span>7 500 ₽</span><i>хит</i></button>
+        <button type="button" class="offer__chip" data-open-plans="sites" data-focus="Максимум"><b>Максимум</b><span>10 000 ₽</span></button>
+      </div>
+    </div>
+    <div class="offer__right">
+      <div class="offer__orbit" aria-hidden="true"><span></span><span></span><span></span></div>
+      <button type="button" class="offer__open magnetic" data-open-plans="sites">
+        <span class="offer__open-ico" aria-hidden="true">✦</span>
+        <b>Выбрать пакет</b>
+        <small>сайты и программы</small>
+      </button>
+      <p class="offer__note">Домен и хостинг — отдельно, по факту</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ПРОЦЕСС ============ -->
+<section class="section" id="process">
+  <div class="section__head reveal">
+    <span class="kicker">03 / как работаю</span>
+    <h2>Четыре шага до готового сайта</h2>
+  </div>
+  <ol class="steps">
+    <li class="step reveal"><span class="step__n">01</span><h4>Созвон / переписка</h4><p>Пять минут: что за дело, кто клиенты, какие есть фото и тексты.</p></li>
+    <li class="step reveal"><span class="step__n">02</span><h4>Предоплата 50%</h4><p>Фиксируем цену и срок. Никаких «а ещё доплатите».</p></li>
+    <li class="step reveal"><span class="step__n">03</span><h4>Первая версия</h4><p>Показываю живую ссылку. Правим, пока не скажешь «огонь».</p></li>
+    <li class="step reveal"><span class="step__n">04</span><h4>Запуск</h4><p>Домен, хостинг, Яндекс. Остаток оплаты — после запуска.</p></li>
+  </ol>
+</section>
+
+<!-- ============ ОПЫТ ============ -->
+<section class="section" id="works">
+  <div class="splite reveal">
+    <svg class="splite__spot" viewBox="0 0 3787 2842" fill="none" aria-hidden="true">
+      <g filter="url(#spotBlur)">
+        <ellipse cx="1924.71" cy="273.501" rx="1924.71" ry="273.501" transform="matrix(-0.822377 -0.568943 -0.568943 0.822377 3631.88 2291.09)" fill="#f0cd73" fill-opacity="0.24"></ellipse>
+      </g>
+      <defs>
+        <filter id="spotBlur" x="0.860352" y="0.838989" width="3785.16" height="2840.26" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+          <feFlood flood-opacity="0" result="BackgroundImageFix"></feFlood>
+          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"></feBlend>
+          <feGaussianBlur stdDeviation="151" result="blur"></feGaussianBlur>
+        </filter>
+      </defs>
+    </svg>
+    <div class="splite__text">
+      <span class="kicker">04 / опыт</span>
+      <h2 class="splite__title">Не только сайты</h2>
+      <p>Пишу программы для Windows, игры с ИИ-агентами и автоматизацию рутины: Excel, Word, PDF, учёт и отчёты — в одну кнопку. Сайт для меня — разминка.</p>
+      <div class="splite__chips"><i>Python</i><i>C#</i><i>Godot 4</i><i>JavaScript</i><i>HTML / CSS</i><i>Excel · Word · PDF</i></div>
+      <div class="splite__stats">
+        <div><b>5+</b><span>своих программ</span></div>
+        <div><b>2</b><span>игры с ИИ</span></div>
+        <div><b>1</b><span>кнопка вместо рутины</span></div>
+      </div>
+      <a href="#contact" class="btn btn--gold magnetic" data-plan="Программа / автоматизация">Нужна программа <span class="arr">→</span></a>
+    </div>
+    <div class="splite__scene" id="splineScene">
+      <canvas aria-label="Интерактивный 3D-робот"></canvas>
+      <div class="splite__loader" aria-hidden="true"></div>
+      <div class="splite__fallback" aria-hidden="true">
+        <div class="core">
+          <div class="core__ring"><i>Python</i><i>C#</i><i>Godot</i><i>JS</i></div>
+          <div class="core__ring core__ring--2"></div>
+          <div class="core__orb"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="works">
+    <article class="work work--wide reveal tilt" data-tilt="5">
+      <div class="work__visual v-arena"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="work__body">
+        <div class="tags"><i>Godot 4</i><i>ИИ-агенты</i><i>3D</i></div>
+        <h3>Evolution Arena</h3>
+        <p>3D-лаборатория: две команды автономных ИИ-агентов добывают ресурсы, исследуют, строят и сражаются. Знания сохраняются между раундами.</p>
+      </div>
+    </article>
+    <article class="work reveal tilt" data-tilt="7">
+      <div class="work__visual v-cubes"><b></b><b></b><b></b><b></b></div>
+      <div class="work__body">
+        <div class="tags"><i>Godot 4</i><i>Симуляция</i></div>
+        <h3>Cube Lab</h3>
+        <p>Игра-эксперимент в духе «прятки ИИ»: агенты учатся использовать кубы и укрытия.</p>
+      </div>
+    </article>
+    <article class="work reveal tilt" data-tilt="7">
+      <div class="work__visual v-map"><em></em><em></em><em></em></div>
+      <div class="work__body">
+        <div class="tags"><i>Python</i><i>Карты</i><i>EXE</i></div>
+        <h3>Система карт и зон</h3>
+        <p>Настольная программа для организации: интерактивные карты, справочники, поиск, реестры поручений.</p>
+      </div>
+    </article>
+    <article class="work reveal tilt" data-tilt="7">
+      <div class="work__visual v-buffer"><u></u><u></u><u></u></div>
+      <div class="work__body">
+        <div class="tags"><i>C#</i><i>Windows</i><i>Сеть</i></div>
+        <h3>Буфер обмена по сети</h3>
+        <p>Утилита для обмена данными между компьютерами локальной сети с восстановлением истории.</p>
+      </div>
+    </article>
+    <article class="work reveal tilt" data-tilt="7">
+      <div class="work__visual v-phone"><s></s></div>
+      <div class="work__body">
+        <div class="tags"><i>Python</i><i>Android</i></div>
+        <h3>Менеджер телефона</h3>
+        <p>Программа для ПК: управление смартфоном, перенос и проверка данных одним окном.</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- ============ ТОННЕЛЬ: ОТЗЫВЫ / ГАРАНТИИ ============ -->
+<section class="tunnel" id="reviews">
+  <div class="tunnel__sticky">
+    <div class="tunnel__rings" aria-hidden="true"><i></i><i></i><i></i></div>
+    <div class="tunnel__center">
+      <span class="kicker" id="tunnelKicker">05 / гарантии</span>
+      <h2 class="tunnel__title" id="tunnelTitle">Почему со мной <span class="shine">спокойно</span></h2>
+      <p id="tunnelSub">Листай — карточки летят навстречу.</p>
+    </div>
+    <div class="tunnel__stage" id="tunnelStage"></div>
+    <div class="tunnel__hint" aria-hidden="true">Листай</div>
+  </div>
+</section>
+
+<!-- ============ КАЛЬКУЛЯТОР ============ -->
+<section class="section" id="calc">
+  <div class="section__head reveal">
+    <span class="kicker">06 / калькулятор</span>
+    <h2>Посчитай свой сайт за 10 секунд</h2>
+  </div>
+  <div class="calc reveal">
+    <div class="calc__opts">
+      <div class="calc__group">
+        <span class="calc__label">Тип сайта</span>
+        <div class="seg" id="calcType">
+          <button type="button" data-v="5000" class="on">Визитка</button>
+          <button type="button" data-v="7500">Лендинг</button>
+          <button type="button" data-v="9000">Каталог</button>
+        </div>
+      </div>
+      <div class="calc__group">
+        <span class="calc__label">Что добавить</span>
+        <label class="chk"><input type="checkbox" data-v="1000"><span></span>Галерея работ</label>
+        <label class="chk"><input type="checkbox" data-v="1000"><span></span>Форма заявки в мессенджер</label>
+        <label class="chk"><input type="checkbox" data-v="1500"><span></span>Квиз / калькулятор для клиентов</label>
+        <label class="chk"><input type="checkbox" data-v="1000"><span></span>Тексты напишу я</label>
+        <label class="chk"><input type="checkbox" data-v="1500"><span></span>Домен + хостинг + настройка «под ключ»</label>
+      </div>
+      <div class="calc__group">
+        <span class="calc__label">Срок</span>
+        <div class="seg" id="calcSpeed">
+          <button type="button" data-k="1" class="on">Обычный</button>
+          <button type="button" data-k="1.3">Срочно (2 дня)</button>
+        </div>
+      </div>
+    </div>
+    <div class="calc__result">
+      <span>Примерная стоимость</span>
+      <b id="calcSum">5 000 ₽</b>
+      <small id="calcNote">Точную цену назову после 5 минут разговора.</small>
+      <a href="#contact" class="btn btn--gold btn--block magnetic" id="calcSend">Отправить расчёт</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FAQ ============ -->
+<section class="section" id="faq">
+  <div class="section__head reveal">
+    <span class="kicker">07 / вопросы</span>
+    <h2>Частые вопросы</h2>
+  </div>
+  <div class="faq">
+    <details class="reveal"><summary>У меня нет текстов и фото. Это проблема?</summary><p>Нет. Тексты напишу сам по короткой переписке, фото возьмём из твоих соцсетей или подберу качественные бесплатные.</p></details>
+    <details class="reveal"><summary>Сайт будет нормально выглядеть на телефоне?</summary><p>Да. Сначала делаю мобильную версию — 80% твоих клиентов придут именно с телефона.</p></details>
+    <details class="reveal"><summary>Кто будет менять цены, если что-то поменяется?</summary><p>В первый месяц — я бесплатно. Дальше — по запросу, мелкие правки занимают минуты и стоят символически.</p></details>
+    <details class="reveal"><summary>Как оплачивать?</summary><p>50% перед стартом, 50% после запуска. Перевод на карту или через самозанятость — с чеком.</p></details>
+    <details class="reveal"><summary>Меня найдут в Яндексе?</summary><p>Сайт добавлю в Яндекс.Вебмастер и привяжу к твоей карточке на Яндекс.Картах. Это лучший старт для малого бизнеса в своём районе.</p></details>
+  </div>
+</section>
+
+<!-- ============ СВЯЗЬ ============ -->
+<section class="cta" id="contact">
+  <div class="cta__glow" aria-hidden="true"></div>
+  <div class="cta__inner">
+    <span class="kicker reveal">08 / связь</span>
+    <h2 class="cta__title reveal">Расскажи о своём деле —<br><span class="cta__mark">остальное сделаю я<svg viewBox="0 0 420 24" preserveAspectRatio="none" aria-hidden="true"><path d="M4 16 C 90 6, 200 4, 416 12" pathLength="1"/></svg></span></h2>
+    <p class="cta__sub reveal">Опиши задачу одной строкой. Отвечаю сам, обычно в течение часа — без менеджеров и «мы вам перезвоним».</p>
+    <div class="cta__btns reveal">
+      <button type="button" class="btn btn--gold btn--lg magnetic" data-open-plans="sites">Выбрать пакет <span class="arr">→</span></button>
+      <a href="#process" class="btn btn--ghost btn--lg"><span class="cta__play" aria-hidden="true">▶</span>Как я работаю</a>
+    </div>
+    <p class="cta__script reveal">Напиши задачу. Получи сайт.</p>
+    <p class="cta__small reveal">Пара слов — и я пойму, что делать дальше</p>
+    <form class="cta__bar reveal" id="briefBar" novalidate autocomplete="off">
+      <div class="cta__chip" id="planChip" hidden><span></span><button type="button" aria-label="Убрать из заявки">×</button></div>
+      <div class="cta__field">
+        <input id="briefText" maxlength="300" aria-label="Опиши, какой сайт или программа нужны">
+        <span class="cta__ph" id="briefPh" aria-hidden="true"></span>
+      </div>
+      <input type="hidden" name="plan" id="planField">
+      <button class="cta__send" type="submit">Отправить <span aria-hidden="true">→</span></button>
+    </form>
+    <div class="channels cta__channels" id="channels"></div>
+  </div>
+  <div class="crowd" id="crowd" aria-hidden="true"></div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer__big" aria-hidden="true">BUILD&nbsp;SOMETHING&nbsp;GREAT</div>
+  <div class="footer__row">
+    <span>© <span id="year">2026</span> <span data-site="name">НЕМЕЦ</span> · <span data-site="city">Россия</span></span>
+    <a href="#top" class="to-top">Наверх ↑</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/config.js"></script>
+<script src="js/background.js"></script>
+<script src="js/folders.js"></script>
+<script src="js/tunnel.js"></script>
+<script src="js/app.js"></script>
+<script src="js/plans.js"></script>
+<script src="js/contact.js"></script>
+<script src="js/crowd.js"></script>
+<script src="js/glow.js"></script>
+<script src="js/spline.js"></script>
+</body>
+</html>

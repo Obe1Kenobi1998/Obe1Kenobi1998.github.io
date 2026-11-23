@@ -1,0 +1,129 @@
+/* =====================================================================
+   1. ПРОЖЕКТОР ЗА КУРСОРОМ (Spotlight Card, @jahed) — палитра сайта
+   ===================================================================== */
+.sg-host{position:relative;--gx:-9999px;--gy:-9999px;--hue:42}
+.faq details.sg-host{position:relative}
+.sg{position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:3;
+  background:radial-gradient(240px circle at var(--gx) var(--gy),hsl(var(--hue) 90% 62% / .075),transparent 70%)}
+.sg::before,.sg::after,.sg__outer::before{content:"";position:absolute;inset:0;border-radius:inherit;padding:1.5px;
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box exclude,linear-gradient(#000 0 0)}
+/* цветная кромка */
+.sg::before{background:radial-gradient(170px circle at var(--gx) var(--gy),hsl(var(--hue) 95% 60% / 1),transparent 100%);filter:brightness(1.6)}
+/* белый блик на кромке */
+.sg::after{background:radial-gradient(110px circle at var(--gx) var(--gy),hsl(48 100% 96% / .9),transparent 100%)}
+/* размытый ореол снаружи */
+.sg__outer{position:absolute;inset:0;border-radius:inherit;filter:blur(14px);opacity:.55}
+.sg__outer::before{inset:-8px;padding:8px;background:radial-gradient(200px circle at calc(var(--gx) + 8px) calc(var(--gy) + 8px),hsl(var(--hue) 95% 58% / .9),transparent 100%)}
+
+/* =====================================================================
+   2. БЛОК «ОПЫТ» В СТИЛЕ SPLITE (@serafimcloud) + 3D-робот
+   ===================================================================== */
+.splite{position:relative;display:grid;grid-template-columns:1fr 1fr;min-height:520px;margin-bottom:28px;border-radius:22px;overflow:hidden;
+  background:radial-gradient(ellipse 70% 90% at 80% 60%,rgba(212,168,75,.08),transparent 60%),rgba(5,6,8,.96);border:1px solid rgba(255,255,255,.08);
+  box-shadow:0 40px 100px rgba(0,0,0,.5)}
+.splite::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:44px 44px;
+  mask-image:radial-gradient(ellipse 60% 70% at 70% 50%,#000,transparent 80%);-webkit-mask-image:radial-gradient(ellipse 60% 70% at 70% 50%,#000,transparent 80%)}
+/* прожектор из угла — как Spotlight от Aceternity, но золотой */
+.splite__spot{position:absolute;z-index:1;pointer-events:none;left:0;top:-40%;width:138%;height:169%;opacity:0}
+.splite.in .splite__spot{animation:spot 2s ease .75s 1 forwards}
+@keyframes spot{0%{opacity:0;transform:translate(-72%,-62%) scale(.5)}100%{opacity:1;transform:translate(-50%,-40%) scale(1)}}
+@media (min-width:980px){.splite__spot{left:22%;top:-20%;width:84%}}
+.splite__text{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;padding:clamp(28px,4vw,56px)}
+.splite__title{font:800 clamp(30px,4vw,54px)/1.08 var(--f-head);letter-spacing:-.02em;margin:4px 0 16px;
+  background:linear-gradient(180deg,#fafafa 10%,#d6c08c 70%,#a3843f);-webkit-background-clip:text;background-clip:text;color:transparent}
+.splite__text>p{color:var(--tx2);font-size:16.5px;max-width:460px}
+.splite__chips{display:flex;flex-wrap:wrap;gap:8px;margin:22px 0}
+.splite__chips i{font:500 12.5px var(--f-mono);font-style:normal;padding:6px 11px;border-radius:9px;color:var(--tx);background:rgba(255,255,255,.05);border:1px solid var(--line2)}
+.splite__stats{display:flex;gap:30px;flex-wrap:wrap;margin-bottom:26px}
+.splite__stats b{display:block;font:700 26px var(--f-head);color:var(--gold2)}
+.splite__stats span{font-size:13px;color:var(--tx3)}
+.splite__text .btn{align-self:flex-start}
+
+.splite__scene{position:relative;z-index:2;min-height:420px}
+.splite__scene canvas{position:absolute;inset:0;width:100%!important;height:100%!important;opacity:0;transition:opacity 1.2s var(--ease);outline:none}
+.splite__scene.is-ready canvas{opacity:1}
+.splite__loader{position:absolute;left:50%;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;border:2px solid rgba(240,205,115,.15);border-top-color:var(--gold2);animation:spin .9s linear infinite;opacity:0;transition:opacity .3s}
+.splite__scene.is-loading .splite__loader{opacity:1}
+/* запасная анимация: ядро с орбитами технологий */
+.splite__fallback{position:absolute;inset:0;display:grid;place-items:center;opacity:0;transition:opacity .8s}
+.splite__scene.is-fallback .splite__fallback{opacity:1}
+.splite__scene.is-ready .splite__fallback{display:none}
+.core{position:relative;width:min(320px,80%);aspect-ratio:1}
+.core__orb{position:absolute;inset:32%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6dc,#f0cd73 30%,#b8892f 60%,#3a2a10);box-shadow:0 0 60px rgba(240,205,115,.45),0 0 140px rgba(212,168,75,.25);animation:breathe 4s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.06);box-shadow:0 0 80px rgba(240,205,115,.6),0 0 180px rgba(212,168,75,.3)}}
+.core__ring{position:absolute;inset:0;border-radius:50%;border:1px dashed rgba(240,205,115,.25);animation:spin 26s linear infinite}
+.core__ring--2{inset:14%;border-style:solid;border-color:rgba(255,255,255,.07);animation-duration:18s;animation-direction:reverse}
+@keyframes counter{to{rotate:-360deg}}
+.core__ring i{animation:counter 26s linear infinite;position:absolute;left:50%;top:-12px;transform:translateX(-50%);font:600 11.5px var(--f-mono);font-style:normal;padding:4px 9px;border-radius:8px;background:#111419;border:1px solid var(--line2);color:var(--gold2);white-space:nowrap}
+.core__ring i:nth-child(2){top:auto;bottom:-12px}
+.core__ring i:nth-child(3){left:-14px;top:50%;transform:translateY(-50%)}
+.core__ring i:nth-child(4){left:auto;right:-14px;top:50%;transform:translateY(-50%)}
+
+/* =====================================================================
+   3. ПЕРСПЕКТИВНЫЙ ТОННЕЛЬ (Perspective Tunnel Hero, @daiwiikharihar)
+   ===================================================================== */
+.tunnel{position:relative;height:var(--tunnel-h,320vh)}
+.tunnel__sticky{position:sticky;top:0;height:100vh;height:100svh;overflow:hidden}
+.tunnel__sticky::before{content:"";position:absolute;inset:0;pointer-events:none;color:var(--tx);opacity:.12;
+  background-image:radial-gradient(currentColor 1px,transparent 1.3px);background-size:26px 26px;
+  mask-image:radial-gradient(ellipse 70% 65% at 50% 50%,#000 30%,transparent 80%);-webkit-mask-image:radial-gradient(ellipse 70% 65% at 50% 50%,#000 30%,transparent 80%)}
+.tunnel__rings{position:absolute;left:50%;top:50%;width:0;height:0;pointer-events:none}
+.tunnel__rings i{position:absolute;left:0;top:0;border-radius:50%;border:1px solid rgba(240,205,115,.13);transform:translate(-50%,-50%) scale(calc(1 + var(--tp,0) * .5));
+  box-shadow:0 0 60px rgba(212,168,75,.05) inset}
+.tunnel__rings i:nth-child(1){width:min(46vw,52vh);height:min(46vw,52vh);background:radial-gradient(circle,rgba(212,168,75,.07),transparent 70%)}
+.tunnel__rings i:nth-child(2){width:min(72vw,80vh);height:min(72vw,80vh);border-color:rgba(240,205,115,.08)}
+.tunnel__rings i:nth-child(3){width:min(100vw,112vh);height:min(100vw,112vh);border-color:rgba(240,205,115,.05)}
+.tunnel__center{position:absolute;left:50%;top:50%;z-index:1;width:min(720px,calc(100% - 32px));text-align:center;transform:translate(-50%,-50%);pointer-events:none}
+.tunnel__center .kicker{letter-spacing:.32em}
+.tunnel__title{font:800 clamp(32px,5vw,74px)/1.02 var(--f-head);letter-spacing:-.03em;margin:6px 0 18px;
+  background:linear-gradient(180deg,#f4f5f7 20%,#7d8590 110%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tunnel__title .shine{-webkit-text-fill-color:transparent}
+.tunnel__center p{color:var(--tx2);font-size:16px}
+.tunnel__stage{position:absolute;inset:0;perspective:1000px;perspective-origin:50% 50%;z-index:2;pointer-events:none}
+.tunnel__hint{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);font:600 11px var(--f-mono);letter-spacing:.3em;text-transform:uppercase;color:var(--tx3);z-index:3;opacity:calc(1 - var(--tp,0) * 4)}
+.tunnel__hint::after{content:"";display:block;width:1px;height:26px;margin:10px auto 0;background:linear-gradient(var(--gold),transparent);animation:wheel2 1.8s infinite}
+@keyframes wheel2{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+.tcard{--cw:250px;--ch:300px;position:absolute;left:50%;top:50%;width:var(--cw);height:var(--ch);margin:calc(var(--ch) / -2) 0 0 calc(var(--cw) / -2);
+  display:flex;flex-direction:column;gap:12px;padding:22px;border-radius:18px;overflow:hidden;will-change:transform,opacity;visibility:hidden;
+  background:linear-gradient(165deg,rgba(40,44,52,.94),rgba(17,20,25,.96));border:1px solid rgba(255,255,255,.1);
+  box-shadow:0 30px 60px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.08)}
+.tcard::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse 90% 60% at 0% 0%,rgba(240,205,115,.16),transparent 60%)}
+.tcard--promise:nth-child(3n+2){background:linear-gradient(165deg,rgba(104,84,44,.95),rgba(30,26,18,.97));border-color:rgba(240,205,115,.35)}
+.tcard--promise:nth-child(3n){background:linear-gradient(165deg,#f6f1e7,#e3d8c4);border-color:rgba(255,255,255,.6);color:#1a1c20}
+.tcard--promise:nth-child(3n) .tcard__text{color:#4b515b}
+.tcard--promise:nth-child(3n) .tcard__ico{background:#16120a;color:var(--gold2)}
+.tcard__ico{display:grid;place-items:center;width:46px;height:46px;border-radius:13px;font:700 17px var(--f-mono);color:#16120a;background:linear-gradient(135deg,var(--gold2),var(--gold));box-shadow:0 8px 20px rgba(212,168,75,.3)}
+.tcard__title{font:700 19px/1.2 var(--f-head);letter-spacing:-.01em;margin-top:6px}
+.tcard__text{font-size:14.5px;line-height:1.55;color:var(--tx2)}
+.tcard__no{margin-top:auto;font:600 12px var(--f-mono);letter-spacing:.2em;color:var(--tx3)}
+.tcard__head{display:flex;align-items:center;gap:12px}
+.tcard__head b{display:block;font-size:15.5px}
+.tcard__head small{display:block;font-size:12.5px;color:var(--tx3)}
+.tcard__ava{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none;border:2px solid rgba(240,205,115,.5)}
+.tcard__ava--txt{display:grid;place-items:center;font:700 16px var(--f-head);color:#16120a;background:linear-gradient(135deg,var(--gold2),var(--gold))}
+.tcard__stars{color:var(--gold2);letter-spacing:2px;font-size:15px}
+.tcard__stars span{color:var(--line2)}
+.tcard--review .tcard__text{display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden;color:var(--tx)}
+
+/* без анимаций — обычная сетка */
+.tunnel--static{height:auto}
+.tunnel--static .tunnel__sticky{position:relative;height:auto;padding:110px var(--gutter)}
+.tunnel--static .tunnel__rings,.tunnel--static .tunnel__hint{display:none}
+.tunnel--static .tunnel__center{position:relative;left:auto;top:auto;transform:none;margin:0 auto 40px}
+.tunnel--static .tunnel__stage{position:relative;perspective:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:18px;max-width:var(--max);margin:0 auto}
+.tunnel--static .tcard{position:relative;left:auto;top:auto;margin:0;width:auto;visibility:visible}
+
+@media (max-width:980px){
+  .splite{grid-template-columns:1fr}
+  .splite__scene{min-height:360px;border-top:1px solid rgba(255,255,255,.06)}
+}
+@media (max-width:700px){
+  .tcard{--cw:200px;--ch:250px;padding:16px;gap:9px}
+  .tcard__title{font-size:16px}
+  .tcard__text{font-size:13px}
+  .tcard__ico{width:38px;height:38px;font-size:14px}
+  .splite__scene{min-height:300px}
+}
