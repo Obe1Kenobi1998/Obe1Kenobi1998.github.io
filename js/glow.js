@@ -28,12 +28,12 @@
   var mx = -9999, my = -9999, raf = 0;
   function paint() {
     raf = 0;
-    var vh = window.innerHeight, hue = (38 + (mx / window.innerWidth) * 18).toFixed(1);
+    var vh = window.innerHeight, hue = (38 + (mx / window.innerWidth) * 18).toFixed(1), k = (window.uiZ ? window.uiZ() : 1);   // k — масштаб страницы на широких экранах
     for (var i = 0; i < hosts.length; i++) {
       var el = hosts[i], r = el.getBoundingClientRect();
       if (r.bottom < -250 || r.top > vh + 250) continue;              // вне экрана — не трогаем
-      el.style.setProperty("--gx", (mx - r.left).toFixed(1) + "px");
-      el.style.setProperty("--gy", (my - r.top).toFixed(1) + "px");
+      el.style.setProperty("--gx", ((mx - r.left) / k).toFixed(1) + "px");
+      el.style.setProperty("--gy", ((my - r.top) / k).toFixed(1) + "px");
       el.style.setProperty("--hue", hue);
     }
   }

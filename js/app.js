@@ -204,7 +204,7 @@
   /* ---------- курсор, наклон, магнитные кнопки (только мышь) ---------- */
   if (fine && !reduce) {
     var glow = $("#cursorGlow"), gx = 0, gy = 0, tx = 0, ty = 0;
-    window.addEventListener("pointermove", function (e) { tx = e.clientX; ty = e.clientY; glow.style.opacity = 1; }, { passive: true });
+    window.addEventListener("pointermove", function (e) { var k = (window.uiZ ? window.uiZ() : 1); tx = e.clientX / k; ty = e.clientY / k; glow.style.opacity = 1; }, { passive: true });   // на широких экранах страница в масштабе (js/fit.js)
     (function loop() { gx += (tx - gx) * .12; gy += (ty - gy) * .12; glow.style.transform = "translate(" + gx + "px," + gy + "px)"; requestAnimationFrame(loop); })();
 
     $$("[data-tilt]").forEach(function (el) {
@@ -225,9 +225,9 @@
       var b = e.target.closest && e.target.closest(".magnetic");
       $$(".magnetic").forEach(function (m) { if (m !== b) { m.style.setProperty("--mx", "0px"); m.style.setProperty("--my", "0px"); } });
       if (!b) return;
-      var r = b.getBoundingClientRect();
-      b.style.setProperty("--mx", ((e.clientX - r.left - r.width / 2) * .18).toFixed(1) + "px");
-      b.style.setProperty("--my", ((e.clientY - r.top - r.height / 2) * .25).toFixed(1) + "px");
+      var r = b.getBoundingClientRect(), k = (window.uiZ ? window.uiZ() : 1);
+      b.style.setProperty("--mx", ((e.clientX - r.left - r.width / 2) * .18 / k).toFixed(1) + "px");
+      b.style.setProperty("--my", ((e.clientY - r.top - r.height / 2) * .25 / k).toFixed(1) + "px");
     }, { passive: true });
   }
 

@@ -51,7 +51,7 @@ html.pm-lock,html.pm-lock body{overflow:hidden}
 .pm{position:fixed;inset:0;z-index:95;display:grid;place-items:center;padding:16px}
 .pm[hidden]{display:none}
 .pm__backdrop{position:absolute;inset:0;background:rgba(4,5,7,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);opacity:0;transition:opacity .25s}
-.pm__panel{position:relative;width:min(1080px,100%);max-height:calc(100vh - 32px);max-height:calc(100dvh - 32px);overflow:auto;overscroll-behavior:contain;
+.pm__panel{position:relative;width:min(1080px,100%);max-height:calc(100vh / var(--vz,1) - 32px);max-height:calc(100dvh / var(--vz,1) - 32px);overflow:auto;overscroll-behavior:contain;
   padding:clamp(22px,3.4vw,44px);border-radius:24px;background:#111318;border:1px solid rgba(255,255,255,.09);
   box-shadow:0 40px 120px rgba(0,0,0,.7),0 0 0 1px rgba(0,0,0,.5);opacity:0;transform:translateY(18px) scale(.97);transition:opacity .26s var(--ease),transform .32s var(--ease)}
 .pm--open .pm__backdrop{opacity:1}

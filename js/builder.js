@@ -193,7 +193,8 @@
 
   /* ---------- перетаскивание ---------- */
   function inField(x, y) { var r = field.getBoundingClientRect(); return x > r.left && x < r.right && y > r.top && y < r.bottom; }
-  function fieldPt(x, y) { var r = field.getBoundingClientRect(); return { x: x - r.left, y: y - r.top }; }
+  function zk() { return (window.uiZ ? window.uiZ() : 1); }                 // масштаб страницы на широких экранах (js/fit.js)
+  function fieldPt(x, y) { var r = field.getBoundingClientRect(), k = zk(); return { x: (x - r.left) / k, y: (y - r.top) / k }; }
   // из палитры: мышь — тянуть, палец — нажать
   pal.addEventListener("pointerdown", function (e) {
     var b = e.target.closest(".bld__mod"); if (!b || e.button) return;
@@ -206,7 +207,7 @@
         ghost = b.cloneNode(true); ghost.className = "bld__mod bld__ghost"; document.body.appendChild(ghost);
       }
       if (ghost) {
-        ghost.style.transform = "translate(" + (ev.clientX - 90) + "px," + (ev.clientY - 26) + "px) rotate(-3deg)";
+        ghost.style.transform = "translate(" + (ev.clientX / zk() - 90) + "px," + (ev.clientY / zk() - 26) + "px) rotate(-3deg)";
         field.classList.toggle("is-over", inField(ev.clientX, ev.clientY));
       }
     }
@@ -240,7 +241,7 @@
         var over = document.elementFromPoint(ev.clientX, ev.clientY), on = over && over.closest(".bld__node");
         nodes.forEach(function (o) { o.el.classList.toggle("is-target", !!on && o.el === on && o !== n); });
       } else {
-        n.x = x0 + ev.clientX - sx; n.y = y0 + ev.clientY - sy; clampPos(n); place(n); drawWires();
+        n.x = x0 + (ev.clientX - sx) / zk(); n.y = y0 + (ev.clientY - sy) / zk(); clampPos(n); place(n); drawWires();
       }
     }
     function up(ev) {

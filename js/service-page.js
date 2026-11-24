@@ -59,7 +59,7 @@
   if (window.matchMedia("(pointer: fine)").matches && !reduce) {
     var glow = $("#cursorGlow"), gx = 0, gy = 0, tx = 0, ty = 0;
     if (glow) {
-      window.addEventListener("pointermove", function (e) { tx = e.clientX; ty = e.clientY; glow.style.opacity = 1; }, { passive: true });
+      window.addEventListener("pointermove", function (e) { var k = (window.uiZ ? window.uiZ() : 1); tx = e.clientX / k; ty = e.clientY / k; glow.style.opacity = 1; }, { passive: true });
       (function loop() { gx += (tx - gx) * .12; gy += (ty - gy) * .12; glow.style.transform = "translate(" + gx + "px," + gy + "px)"; requestAnimationFrame(loop); })();
     }
   }

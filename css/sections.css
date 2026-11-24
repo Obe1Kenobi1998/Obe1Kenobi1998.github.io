@@ -1,5 +1,5 @@
 /* ================= ГЕРОЙ ================= */
-.hero{position:relative;max-width:var(--max);margin:0 auto;min-height:100vh;min-height:100svh;padding:calc(var(--ticker-h) + 130px) var(--gutter) 90px;display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+.hero{position:relative;max-width:var(--max);margin:0 auto;min-height:calc(100vh / var(--vz,1));min-height:calc(100svh / var(--vz,1));padding:calc(var(--ticker-h) + 130px) var(--gutter) 90px;display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
 .hero__title{font-size:clamp(32px,4.2vw,62px);font-weight:800;margin:22px 0 22px}
 .hero__title .line{display:block}
 .hero__sub{font-size:clamp(16px,1.5vw,19px);color:var(--tx2);max-width:560px}
