@@ -62,7 +62,7 @@
     <a href="#process">Как работаю</a>
     <a href="#works">Опыт</a>
     <a href="#calc">Конструктор</a>
-    <a href="#service">Сервис</a>
+    <a href="service.html" class="nav__ext">Сервис <span aria-hidden="true">↗</span></a>
     <a href="#faq">Вопросы</a>
   </nav>
   <a href="#contact" class="btn btn--gold btn--sm magnetic">Обсудить проект</a>
@@ -352,26 +352,18 @@
   <div class="pay__methods reveal" id="payMethods"></div>
 </section>
 
-<!-- ============ СЕРВИСНЫЙ ЦЕНТР ============ -->
-<section class="svc" id="service">
-  <div class="svc__inner">
-    <div class="svc__head reveal">
+<!-- ============ СЕРВИСНЫЙ ЦЕНТР: короткое меню → service.html ============ -->
+<section class="svc svc--mini" id="service">
+  <div class="svc__inner svcm">
+    <div class="svcm__text reveal">
       <div class="svc__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Сервисный центр</div>
       <span class="kicker">08 / сервис</span>
-      <h2>Комп тормозит или глючит? <span>Проверь сам — бесплатно</span></h2>
-      <p>Проверенные утилиты от официальных разработчиков. Кнопка «Скачать» сразу качает файл — без регистраций и переходов на чужие сайты.</p>
-      <div class="svc__status"><i></i><span id="svcStatus">Ссылки проверены</span></div>
+      <h2>Комп тормозит или глючит? <span>Проверь сам&nbsp;— бесплатно</span></h2>
+      <p>Отдельная страница с проверенными утилитами: диски, память, температура, вирусы, флешки и восстановление файлов. Родные значки, прямые ссылки на официальные файлы.</p>
+      <a href="service.html" class="btn btn--svc btn--lg svcm__go">Открыть сервисный центр <span class="arr">→</span></a>
+      <small class="svcm__note"><i></i><span id="svcmCount">14 утилит</span> · без регистрации и рекламы</small>
     </div>
-    <div class="svc__steps reveal">
-      <div><b>1</b>Выбери проблему</div><div><b>2</b>Скачай утилиту</div><div><b>3</b>Не помогло — напиши мне</div>
-    </div>
-    <div class="svc__filters reveal" id="svcFilters" role="tablist" aria-label="Категории"></div>
-    <div class="svc__grid" id="svcGrid"></div>
-    <div class="svc__cta reveal">
-      <p>Не разобрался или нужна программа под твою задачу? Опиши проблему — подскажу, что делать.</p>
-      <a href="#contact" class="btn btn--svc" data-plan="Помощь с компьютером">Написать мастеру <span class="arr">→</span></a>
-    </div>
-    <p class="svc__legal">Все программы бесплатные для домашнего использования и принадлежат своим разработчикам. Ссылки ведут на файлы с их официальных серверов.</p>
+    <nav class="svcm__menu reveal" id="svcMenu" aria-label="Разделы сервисного центра"></nav>
   </div>
 </section>
 

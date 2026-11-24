@@ -12,6 +12,8 @@
   var IDLE = 5000;            // через сколько мс без движения звёзды идут домой
   var RAMP = 2500;            // за сколько мс включается «тяга домой»
   var lastMove = -1e9;
+  // цвета: линии | акцент | точки. data-tint="green" — для страницы сервисного центра
+  var TINT = cv.getAttribute("data-tint") === "green" ? ["47,120,78", "47,143,91", "29,63,43"] : ["160,118,40", "195,146,51", "70,55,35"];
 
   function size() {
     W = window.innerWidth; H = window.innerHeight;
@@ -65,16 +67,16 @@
       for (var j = i + 1; j < pts.length; j++) {
         var q = pts[j], ex = p.x - q.x, ey = p.y - q.y, e2 = ex * ex + ey * ey;
         if (e2 < link2) {
-          ctx.strokeStyle = "rgba(160,118,40," + (1 - e2 / link2) * .2 + ")";
+          ctx.strokeStyle = "rgba(" + TINT[0] + "," + (1 - e2 / link2) * .2 + ")";
           ctx.lineWidth = 1;
           ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke();
         }
       }
       if (att > 0 && d2 < 32000) {
-        ctx.strokeStyle = "rgba(195,146,51," + (1 - d2 / 32000) * .5 * att + ")";
+        ctx.strokeStyle = "rgba(" + TINT[1] + "," + (1 - d2 / 32000) * .5 * att + ")";
         ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
       }
-      ctx.fillStyle = p.g ? "rgba(195,146,51,.85)" : "rgba(70,55,35,.28)";
+      ctx.fillStyle = p.g ? "rgba(" + TINT[1] + ",.85)" : "rgba(" + TINT[2] + ",.28)";
       ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 6.283); ctx.fill();
     }
     requestAnimationFrame(frame);

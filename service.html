@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Сервисный центр — НЕМЕЦ</title>
+  <meta name="description" content="Бесплатные утилиты для проверки и починки компьютера: диски, память, температура, вирусы, флешки, восстановление файлов. Прямые ссылки на официальные файлы.">
+  <meta name="theme-color" content="#eef3e7">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sections.css">
+  <link rel="stylesheet" href="css/theme-light.css">
+  <link rel="stylesheet" href="css/blocks.css">
+  <link rel="stylesheet" href="css/service-page.css">
+</head>
+<body class="svcp">
+
+<div class="bg" aria-hidden="true">
+  <canvas id="net" data-tint="green"></canvas>
+  <div class="bg__aurora a1"></div>
+  <div class="bg__aurora a2"></div>
+  <div class="bg__aurora a3"></div>
+  <div class="bg__grid"></div>
+  <div class="bg__noise"></div>
+</div>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<!-- ============ ШАПКА ============ -->
+<header class="nav" id="nav">
+  <a href="index.html" class="brand" aria-label="На главную">
+    <span class="brand__mark"><span>&gt;_</span></span>
+    <span class="brand__text"><b data-site="name">НЕМЕЦ</b><small>сервисный центр</small></span>
+  </a>
+  <nav class="nav__links" id="navLinks">
+    <a href="index.html" class="nav__home"><span aria-hidden="true">←</span> Главная</a>
+    <a href="#symptoms">Что случилось</a>
+    <a href="#tools">Утилиты</a>
+    <a href="#how">Как пользоваться</a>
+    <a href="#help">Помощь</a>
+  </nav>
+  <a href="index.html?plan=%D0%9F%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%20%D1%81%20%D0%BA%D0%BE%D0%BC%D0%BF%D1%8C%D1%8E%D1%82%D0%B5%D1%80%D0%BE%D0%BC#contact" class="btn btn--svc btn--sm">Написать мастеру</a>
+  <button class="nav__burger" id="burger" aria-label="Меню" type="button"><span></span><span></span></button>
+</header>
+
+<main class="svc svcp__main" id="top">
+
+<!-- ============ ГЕРОЙ ============ -->
+<section class="sph">
+  <div class="sph__text">
+    <div class="sph__top reveal">
+      <div class="svc__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg>Сервисный центр</div>
+      <a href="index.html" class="sph__crumb"><span aria-hidden="true">←</span> Главная <i>/</i> <b>Сервис</b></a>
+    </div>
+    <h1 class="reveal">Комп тормозит или глючит? <span>Проверь сам&nbsp;— бесплатно</span></h1>
+    <p class="sph__sub reveal">Проверенные утилиты от официальных разработчиков с родными значками. Кнопка «Скачать» сразу качает файл — без регистраций, рекламы и переходов на чужие сайты.</p>
+    <div class="svc__status reveal"><i></i><span id="svcStatus">Ссылки проверены</span></div>
+    <div class="sph__cta reveal">
+      <a href="#symptoms" class="btn btn--svc btn--lg">Подобрать по симптому <span class="arr">↓</span></a>
+      <a href="#tools" class="btn btn--ghost btn--lg">Все утилиты</a>
+    </div>
+    <div class="sph__stats reveal">
+      <div><b id="sphTools">14</b><span>утилит</span></div>
+      <div><b id="sphCats">7</b><span>разделов</span></div>
+      <div><b>0 ₽</b><span>всё бесплатно</span></div>
+    </div>
+  </div>
+
+  <div class="sph__visual reveal" aria-label="Значки утилит">
+    <div class="orb">
+      <div class="orb__glow" aria-hidden="true"></div>
+      <div class="orb__ring orb__ring--2"><div class="orb__spin" id="orbR2"></div></div>
+      <div class="orb__ring orb__ring--1"><div class="orb__spin" id="orbR1"></div></div>
+      <div class="orb__core">
+        <svg class="orb__pulse" viewBox="0 0 120 40" aria-hidden="true"><path d="M0 22h30l6-14 8 26 7-18 5 6h64" pathLength="1"/></svg>
+        <b>Диагностика</b>
+        <small>status: <em>ok</em></small>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ СИМПТОМЫ ============ -->
+<section class="sps" id="symptoms">
+  <div class="sp-head reveal">
+    <span class="kicker">01 / что случилось</span>
+    <h2>Выбери, что беспокоит</h2>
+    <p>Нажми на симптом — покажу только те утилиты, которые помогут именно с ним.</p>
+  </div>
+  <div class="sps__grid" id="spsGrid"></div>
+</section>
+
+<!-- ============ УТИЛИТЫ ============ -->
+<section class="spt" id="tools">
+  <div class="sp-head reveal">
+    <span class="kicker">02 / утилиты</span>
+    <h2>Все программы для проверки и починки</h2>
+    <p>Фильтруй по разделу или ищи по названию и проблеме.</p>
+  </div>
+  <div class="spt__bar">
+    <div class="svc__filters" id="svcFilters" role="tablist" aria-label="Разделы"></div>
+    <div class="spt__tools">
+      <div class="spt__sym" id="svcSym" hidden><span></span><button type="button" aria-label="Сбросить симптом">×</button></div>
+      <label class="spt__search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <input id="svcSearch" type="search" placeholder="Поиск: диск, вирус, флешка…" aria-label="Поиск утилиты" autocomplete="off">
+      </label>
+      <span class="spt__info" id="svcInfo" aria-live="polite"></span>
+    </div>
+  </div>
+  <div class="svc__grid" id="svcGrid"></div>
+  <div class="spt__empty" id="svcEmpty" hidden>
+    <b>Ничего не нашлось</b>
+    <p>Попробуй другое слово или опиши проблему мне — подскажу, чем проверить.</p>
+    <button type="button" class="btn btn--ghost btn--sm" id="svcReset">Показать все утилиты</button>
+  </div>
+</section>
+
+<!-- ============ КАК ПОЛЬЗОВАТЬСЯ ============ -->
+<section class="spw" id="how">
+  <div class="sp-head reveal">
+    <span class="kicker">03 / как пользоваться</span>
+    <h2>Четыре правила, чтобы не сделать хуже</h2>
+  </div>
+  <div class="spw__grid">
+    <div class="spw__card reveal"><b>1</b><h3>Сначала копия</h3><p>Перед проверкой диска или восстановлением сохрани важные файлы на флешку или в облако.</p></div>
+    <div class="spw__card reveal"><b>2</b><h3>По симптому, а не всё подряд</h3><p>Выбери проблему выше и запусти одну-две подходящие утилиты. Так быстрее и понятнее.</p></div>
+    <div class="spw__card reveal"><b>3</b><h3>Флешка будет стёрта</h3><p>Rufus и Ventoy форматируют флешку. Проверь, что на ней нет нужного.</p></div>
+    <div class="spw__card reveal"><b>4</b><h3>Только офсайты</h3><p>Здесь ссылки ведут прямо на сервера разработчиков. «Ускорители» с непонятных сайтов не качай.</p></div>
+  </div>
+</section>
+
+<!-- ============ ПОМОЩЬ ============ -->
+<section class="sp-help" id="help">
+  <div class="svc__cta reveal">
+    <div>
+      <h2>Не разобрался? Помогу</h2>
+      <p>Опиши, что происходит с компьютером, — подскажу, чем проверить, или сделаю программу под твою задачу.</p>
+    </div>
+    <a href="index.html?plan=%D0%9F%D0%BE%D0%BC%D0%BE%D1%89%D1%8C%20%D1%81%20%D0%BA%D0%BE%D0%BC%D0%BF%D1%8C%D1%8E%D1%82%D0%B5%D1%80%D0%BE%D0%BC#contact" class="btn btn--svc btn--lg">Написать мастеру <span class="arr">→</span></a>
+  </div>
+  <p class="svc__legal">Все программы бесплатные для домашнего использования и принадлежат своим разработчикам. Значки — оригинальные иконки программ. Ссылки ведут на файлы с официальных серверов.</p>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer__big" aria-hidden="true">FIX&nbsp;IT&nbsp;YOURSELF</div>
+  <div class="footer__row">
+    <span>© <span id="year">2026</span> <span data-site="name">НЕМЕЦ</span> · <span data-site="city">Россия</span></span>
+    <a href="index.html" class="to-top">← На главную</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/config.js"></script>
+<script src="js/background.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/service.js"></script>
+<script src="js/service-page.js"></script>
+</body>
+</html>

@@ -90,6 +90,17 @@
     toast("«" + a.getAttribute("data-plan") + "» — добавлено в заявку 👇", "ok");
   });
 
+  // пришли со страницы сервисного центра: index.html?plan=...#contact → тема сразу в заявке
+  try {
+    var qPlan = new URLSearchParams(location.search).get("plan");
+    if (qPlan) {
+      qPlan = qPlan.slice(0, 80);
+      // ждём, пока подключатся все скрипты (contact.js слушает plan:change)
+      document.addEventListener("DOMContentLoaded", function () { setPlan("Выбрано: " + qPlan); });
+      history.replaceState(null, "", location.pathname + location.hash);
+    }
+  } catch (e) {}
+
   /* калькулятор переехал в js/builder.js (конструктор проекта) */
 
   /* ---------- меню ---------- */

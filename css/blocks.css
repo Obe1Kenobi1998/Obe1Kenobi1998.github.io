@@ -200,6 +200,40 @@
 .btn--svc:hover{filter:brightness(1.05)}
 .svc__legal{margin-top:16px;font-size:12px;color:var(--sv-tx2);opacity:.8}
 
+/* ---------- главная: короткое меню сервисного центра (ведёт на service.html) ---------- */
+@view-transition{navigation:auto}
+.nav__ext span{display:inline-block;font-size:.85em;opacity:.6;transition:transform .2s}
+.nav__ext:hover span{transform:translate(2px,-2px);opacity:1}
+.svc--mini{padding:110px var(--gutter)}
+.svc--mini h2{font-size:clamp(26px,3.3vw,46px)}
+.svcm{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:44px;align-items:center}
+.svcm__text>p{margin-top:16px;font-size:17px;color:var(--sv-tx2)}
+.svcm__go{margin-top:26px}
+.svcm__note{display:flex;align-items:center;gap:8px;margin-top:14px;font:500 12.5px var(--f-mono);color:var(--sv-tx2)}
+.svcm__note i{width:8px;height:8px;border-radius:50%;background:#2fbf6b;box-shadow:0 0 0 0 rgba(47,191,107,.5);animation:pulse 2s infinite}
+.svcm__menu{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.svcm__tile{position:relative;display:flex;flex-direction:column;gap:4px;min-width:0;padding:16px 16px 15px;border-radius:18px;color:var(--sv-ink);
+  background:rgba(255,255,255,.74);border:1px solid rgba(47,143,91,.16);box-shadow:0 12px 30px rgba(29,63,43,.07);
+  transition:transform .3s var(--ease),box-shadow .3s,border-color .3s,background .3s}
+.svcm__tile:hover{transform:translateY(-5px);background:#fff;border-color:rgba(47,143,91,.45);box-shadow:0 22px 44px rgba(29,63,43,.15)}
+.svcm__tile:focus-visible{outline:3px solid #6cc28f;outline-offset:2px}
+.svcm__icons{display:flex;height:40px;margin-bottom:10px}
+.svcm__icons i{display:grid;place-items:center;width:40px;height:40px;flex:none;margin-right:-12px;border-radius:12px;background:#fff;border:1px solid rgba(47,143,91,.16);
+  box-shadow:0 6px 14px rgba(29,63,43,.14);transition:margin .35s var(--ease),transform .35s var(--ease)}
+.svcm__icons i:nth-child(2){transform:rotate(6deg)}
+.svcm__icons i:nth-child(3){transform:rotate(-5deg)}
+.svcm__icons img{width:26px;height:26px;object-fit:contain}
+.svcm__tile:hover .svcm__icons i{margin-right:5px;transform:none}
+.svcm__tile b{font:700 clamp(12.5px,1.05vw,14.5px)/1.25 var(--f-head);overflow-wrap:break-word}
+.svcm__tile small{font:500 11.5px var(--f-mono);color:var(--sv-tx2)}
+.svcm__tile em{position:absolute;top:12px;right:14px;font-style:normal;font-weight:700;color:var(--sv-acc);opacity:.45;transition:transform .25s,opacity .25s}
+.svcm__tile:hover em{opacity:1;transform:translate(2px,-2px)}
+.svcm__tile--all{color:#eaf5ec;border-color:transparent;background:radial-gradient(ellipse at 0% 0%,rgba(108,194,143,.45),transparent 60%),linear-gradient(135deg,#2c6a45,#173323)}
+.svcm__tile--all:hover{background:radial-gradient(ellipse at 0% 0%,rgba(108,194,143,.6),transparent 60%),linear-gradient(135deg,#2f7a4e,#173323);border-color:transparent}
+.svcm__tile--all small{color:#a9e2bf}
+.svcm__tile--all em{color:#a9e2bf;opacity:.8}
+.svcm__num{display:block;height:40px;margin-bottom:10px;font:800 34px/40px var(--f-head);color:#fff}
+
 /* =====================================================================
    АДАПТИВ
    ===================================================================== */
@@ -209,6 +243,7 @@
   .bld__sum .btn,.bld__note,.bld__urgent{grid-column:2}
   .bld__lcd{grid-row:span 2}
   .svc__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .svcm{grid-template-columns:minmax(0,1fr);gap:34px}
 }
 @media (max-width:860px){
   .pay{grid-template-columns:minmax(0,1fr)}
@@ -231,6 +266,15 @@
   .svc{padding:90px var(--gutter)}
   .svc__steps{grid-template-columns:1fr}
   .svc__grid{grid-template-columns:minmax(0,1fr)}
+  .svc--mini{padding:80px var(--gutter)}
+  .svcm__menu{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .svcm__tile{padding:14px 13px 13px}
+  .svcm__icons{height:34px;margin-bottom:8px}
+  .svcm__icons i{width:34px;height:34px;margin-right:-10px;border-radius:10px}
+  .svcm__icons img{width:22px;height:22px}
+  .svcm__num{height:34px;margin-bottom:8px;font-size:28px;line-height:34px}
+  .svcm__tile b{font-size:13.5px}
+  .svcm__go{width:100%}
 }
 @media (max-width:430px){
   .bld__node{width:150px}
