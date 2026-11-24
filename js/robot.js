@@ -10,7 +10,7 @@
      терминал, сборка EXE, игра с ИИ; поверх — всплывающие надписи (HTML).
    Руки сглаживаются (без рывков), значки и реквизит прогреваются заранее (без подвисаний).
    Значки и панели держит своей же кистью со скелетом (16 суставов): за боковую кромку, ладонь
-   к зрителю, четыре пальца сзади, большой палец на лицевой стороне; пальцы смыкаются по очереди,
+   к груди, тыльная сторона к зрителю, четыре пальца на лицевой стороне, большой палец сзади; пальцы смыкаются по очереди,
    пока держит — шевелятся, отпустил — раскрываются. Рука подстраивается под кисть, сторона хвата
    не меняется на ходу (без перекручивания).
    PDF: замах, бросок, полёт вокруг робота (и за головой), ловля в подставленные руки.
@@ -1070,9 +1070,9 @@
 
     /* ---------- кисти-захваты: скелет из родной кисти робота ----------
        Берётся сама кисть Spline (та же форма, что у робота) и получает скелет: ладонь, четыре пальца
-       по три фаланги и большой палец — каждый сустав двигается сам. Хват — как держат фото или планшет
-       за боковую кромку: ладонь к зрителю, кончики четырёх пальцев заходят за кромку сзади (видны их
-       нижние фаланги), большой палец лежит на лицевой стороне — видны все пять пальцев.
+       по три фаланги и большой палец — каждый сустав двигается сам. Хват — как человек держит табличку
+       за боковую кромку: ладонь внутрь, к груди и к предмету, тыльная сторона кисти — наружу, к зрителю;
+       четыре пальца лежат на лицевой стороне у кромки, большой палец обхватывает предмет сзади.
        Левая рука — левая, правая — правая. При касании пальцы смыкаются по очереди с лёгким «доводом»,
        пока держит — живые микродвижения, отпустил или бросил — раскрываются, кисть остаётся на руке. */
     var Q4 = THREE.Quaternion;
@@ -1160,8 +1160,8 @@
       grip: { f: [[-.32, -.12, -.1, .09], [-.3, -.1, -.08, .02], [-.28, -.08, -.06, -.05], [-.25, -.05, -.04, -.13]], t: [.331, .495, .158, -.203, .188], ts: 1.28 }
     };
     // Хват в сырых координатах: кромка предмета — линия y = HG.yc (выше неё — кончики всех четырёх пальцев, сзади),
-    // точка хвата — (HG.ax, HG.yc); лицевая плоскость предмета z = HG.zf — прямо под подушечкой большого пальца.
-    var HG = { ax: -2.4, yc: 33.5, zf: -6, cen: new V3(-5.6, 19, .5), tilt: .35 };
+    // точка хвата — (HG.ax, HG.yc); лицевая плоскость предмета z = HG.zfr — под подушечками пальцев (большой палец — за предметом).
+    var HG = { ax: -2.4, yc: 33.5, zfr: 1.6, cen: new V3(-5.6, 19, .5), tilt: .35 };
     if (HR) (function () {                     // где у позы хвата задняя плоскость (по кончикам пальцев за углом)
       var H = buildHand(), si = HR.geo.attributes.skinIndex, sw = HR.geo.attributes.skinWeight, pp = HR.geo.attributes.position, v = new V3(), zb = 1e9;
       setHand(H, POSE.grip); H.mesh.updateMatrixWorld(true);
@@ -1170,7 +1170,7 @@
         v.fromBufferAttribute(pp, i); H.mesh.boneTransform(i, v);
         if (v.y > HG.yc - .5) zb = Math.min(zb, v.z);
       }
-      if (zb < 1e8) HG.zf = zb - .3 - 7.7;
+      if (zb < 1e8) HG.zfr = zb - .3;
     })();
     function mkGripHand() {
       var Hg = new THREE.Group(); Hg.matrixAutoUpdate = false;
@@ -1200,10 +1200,10 @@
       o.updateMatrixWorld(true); _fm.copy(o.matrixWorld);
       _f1.setFromMatrixColumn(_fm, 0).normalize(); _f2.setFromMatrixColumn(_fm, 1).normalize(); _f3.setFromMatrixColumn(_fm, 2).normalize();
       _fY.copy(_f1).multiplyScalar(-s * Math.cos(HG.tilt)).addScaledVector(_f2, Math.sin(HG.tilt));     // пальцы внутрь и чуть вверх
-      _fZ.copy(_f3).negate();
+      _fZ.copy(_f3);                                                                     // тыльная сторона кисти — к зрителю
       _fX.crossVectors(_fY, _fZ).normalize(); if (dsgn < 0) _fX.negate();
       _fO.set(s * hw, ly, zf).applyMatrix4(_fm)
-        .addScaledVector(_fX, -HG.ax * hs).addScaledVector(_fY, -HG.yc * hs).addScaledVector(_fZ, -HG.zf * hs);
+        .addScaledVector(_fX, -HG.ax * hs).addScaledVector(_fY, -HG.yc * hs).addScaledVector(_fZ, -HG.zfr * hs);
     }
     function handFromObj(A, out) {
       var r = A.gObj, hs = A.hs;
@@ -1216,7 +1216,7 @@
       var hs = A.hs || K * .0039;
       gripFrame(o, s, hw, ly, zf, A.dsgn || 1, hs);
       out.copy(_fO).addScaledVector(_fX, HG.cen.x * hs).addScaledVector(_fY, HG.cen.y * hs).addScaledVector(_fZ, HG.cen.z * hs);
-      A.poleW.copy(_fY).negate().addScaledVector(_fZ, .35).addScaledVector(_f2, -.35).normalize(); A.pkT = 1;
+      A.poleW.copy(_fY).negate().addScaledVector(_f3, -.35).addScaledVector(_f2, -.35).normalize(); A.pkT = 1;
       return out;
     }
     function backOut(k) { k = clamp(k, 0, 1); var c1 = .9, c3 = c1 + 1, u = k - 1; return 1 + c3 * u * u * u + c1 * u * u; }
@@ -1247,7 +1247,7 @@
       for (j = 0; j < 4; j++) {
         k = on ? backOut((A.gt - .02 - FDEL[j]) / .22) : 1 - sm((A.rt - FDEL[j] * .6) / .17);
         for (var q = 0; q < 4; q++) pz.f[j][q] = O.f[j][q] + (Gp.f[j][q] - O.f[j][q]) * k;
-        if (j > 1) { pz.f[j][0] += live * .06 * Math.sin(ph + j); pz.f[j][1] += live * .05 * Math.sin(ph * .8 + j * 1.3); }
+        if (j > 1) { pz.f[j][0] -= live * .035 * (1 + Math.sin(ph + j)); pz.f[j][1] -= live * .03 * (1 + Math.sin(ph * .8 + j * 1.3)); }   // чуть приподнимаются над лицом предмета
       }
       k = on ? backOut((A.gt - .07) / .24) : 1 - sm(A.rt / .14);
       for (j = 0; j < 5; j++) pz.t[j] = O.t[j] + (Gp.t[j] - O.t[j]) * k;
