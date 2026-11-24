@@ -765,7 +765,7 @@
         h.g.halves.forEach(function (hh, i) { var s = i ? 1 : -1; hh.position.set(s * gap0 * (1 - k), 0, 0); hh.rotation.set(0, 0, s * rot0 * (1 - k)); });
         // руки провожают значок и плавно опускаются
         var r = sm(k / .8);
-        edgeW(h.g, 1, _e0); edgeW(h.g, -1, _e1);
+        edgeW(h.g, 1, _e0); edgeW(h.g, -1, _e1); AL.pkT = AR.pkT = 0;     // на возврате локоть не перестраивается (без прокрутки предплечья)
         AL.target.copy(t0).lerp(_e0, Math.min(1, k * 2.5)); AR.target.copy(t1).lerp(_e1, Math.min(1, k * 2.5));
         AL.w = w0 * (1 - r); AR.w = w1 * (1 - r);
       }, easeIO, function () {
@@ -1188,9 +1188,10 @@
     });
     // o — объект (половинка значка или панель), s — какая боковая кромка (−1 левая, +1 правая), hw — полуширина,
     // ly — высота хвата на прямом участке кромки, zf — лицевая плоскость предмета (всё в координатах предмета)
-    function grip(A, o, s, hw, ly, zf) { if (HR) A.req = { o: o, s: s, hw: hw, ly: ly, zf: zf == null ? .001 : zf }; }
-    function gripIcon(A, g, side) { grip(A, g.halves[side < 0 ? 0 : 1], side, ICON / 2, -.015, .001); }
-    var _gi = new M4(), _gt = new V3(), _gd = new V3(), _gn = new V3();
+    // mv — что подвигать, чтобы предмет лёг в кисти (значок целиком или панель)
+    function grip(A, o, s, hw, ly, zf, mv) { if (HR) A.req = { o: o, s: s, hw: hw, ly: ly, zf: zf == null ? .001 : zf, mv: mv || null }; }
+    function gripIcon(A, g, side) { grip(A, g.halves[side < 0 ? 0 : 1], side, ICON / 2, -.015, .001, g); }
+    var _gi = new M4(), _gt = new V3(), _gd = new V3(), _gn = new V3(), _gw0 = new V3(), _gw1 = new V3();
     var _f1 = new V3(), _f2 = new V3(), _f3 = new V3(), _fm = new M4(), _fX = new V3(), _fY = new V3(), _fZ = new V3(), _fO = new V3();
     // Базис кисти у боковой кромки: Y (пальцы) — внутрь предмета и чуть вверх, Z — от камеры (ладонь к зрителю),
     // X — по «руке»; у левой и правой руки большой палец при этом снизу и ложится на лицевую сторону.
@@ -1215,9 +1216,37 @@
     function gripAim(A, o, s, hw, ly, zf, out) {
       var hs = A.hs || K * .0039;
       gripFrame(o, s, hw, ly, zf, A.dsgn || 1, hs);
-      out.copy(_fO).addScaledVector(_fX, HG.cen.x * hs).addScaledVector(_fY, HG.cen.y * hs).addScaledVector(_fZ, HG.cen.z * hs);
+      if (A.hand) { out.copy(_fO).add(boxCenter(A.hand)).sub(wpos(A.hand, _gw0)); }          // предплечье приходит ровно в запястье кисти
+      else out.copy(_fO).addScaledVector(_fX, HG.cen.x * hs).addScaledVector(_fY, HG.cen.y * hs).addScaledVector(_fZ, HG.cen.z * hs);
       A.poleW.copy(_fY).negate().addScaledVector(_f3, -.35).addScaledVector(_f2, -.35).normalize(); A.pkT = 1;
       return out;
+    }
+    // Кисть стоит ровно на конце предплечья. Если рука не дотянулась или чуть отстала на ходу,
+    // предмет в руках мягко подъезжает к пальцам (не больше 7 см, плавно по силе хвата) — без зазора
+    // между рукой и кистью. Сцена каждый кадр сама ставит предмет на место, сдвиг не копится.
+    var NUD = [];
+    function nudgeHeld() {
+      NUD.length = 0;
+      [AL, AR].forEach(function (A) {
+        var r = A.req; if (!r || !r.mv) return;
+        var u = r.mv.userData; if (u.np && r.mv.position.equals(u.np)) r.mv.position.sub(u.nv); u.np = null;
+      });
+      [AL, AR].forEach(function (A) {
+        var r = A.req; if (!r || !r.mv || !A.hand || A.gw < .02 || r.mv.visible === false) return;
+        r.mv.updateMatrixWorld(true);
+        gripFrame(r.o, r.s, r.hw, r.ly, r.zf, A.dsgn, A.hs);
+        var w = sm(A.gw), e = null, i;
+        for (i = 0; i < NUD.length; i++) if (NUD[i].mv === r.mv) e = NUD[i];
+        if (!e) { e = { mv: r.mv, v: new V3(), w: 0, m: 0 }; NUD.push(e); }
+        e.v.addScaledVector(wpos(A.hand, _gw0).sub(_fO), w); e.w += w; e.m = Math.max(e.m, w);
+      });
+      NUD.forEach(function (e) {
+        if (e.w < 1e-4) return;
+        e.v.multiplyScalar(e.m / e.w);
+        var L = e.v.length(), mx = .07 * K; if (L > mx) e.v.multiplyScalar(mx / L);
+        e.mv.position.add(e.v); e.mv.updateMatrixWorld(true);
+        var u = e.mv.userData; u.np = (u.np || new V3()).copy(e.mv.position); u.nv = (u.nv || new V3()).copy(e.v);
+      });
     }
     function backOut(k) { k = clamp(k, 0, 1); var c1 = .9, c3 = c1 + 1, u = k - 1; return 1 + c3 * u * u * u + c1 * u * u; }
     var FDEL = [0, .045, .09, .13];            // задержка смыкания по пальцам: указательный → мизинец
@@ -1238,7 +1267,7 @@
       if (on) { A.gt += dt; A.rt = 0; } else A.rt += dt;
       _gi.copy(A.fore.matrixWorld);
       if (on) {                                             // на предмете; запоминаем положение относительно предплечья
-        handFromObj(A, A.hw);
+        handFromObj(A, A.hw); if (A.hand) A.hw.setPosition(wpos(A.hand, _gw1));     // запястье — ровно на конце предплечья
         A.rel = (A.rel || new M4()).copy(_gi).invert().multiply(A.hw);
       } else A.hw.multiplyMatrices(_gi, A.rel);           // отпустил — кисть едет вместе с рукой
       G.g.matrix.copy(A.hw); G.g.matrixWorldNeedsUpdate = true;
@@ -1467,13 +1496,17 @@
     function iconRight(h, t, lift) {
       var g = h.g; fromHold(t, .7, -.37, (lift || 1.46) + Math.sin(t * 1.8) * .012, .34);
       holdAt(g, _p.x, _p.y, _p.z); g.rotateZ(.12 * seg(t, 0, .7));
-      AR.w = 1; edgeW(g, -1, AR.target, AR); gripIcon(AR, g, -1);         // та же рука и тот же угол, что после захвата — без перекручивания
+      // перехват: сначала держит, как у груди (за внешнюю кромку), потом пальцы раскрываются, рука переносится
+      // и берёт значок за ближнюю к телу кромку — предплечье идёт от тела и продолжает кисть, без перекручивания
+      AR.w = 1;
+      if (t < .28) { edgeW(g, -1, AR.target, AR); gripIcon(AR, g, -1); }
+      else { edgeW(g, 1, AR.target, AR); if (t > .6) gripIcon(AR, g, 1); }
     }
     function leftTo(h, t, P, lx, ly, t0, t1) {
       edgeW(h.g, 1, _q0, AL); if (lx >= 1) gripAim(AL, P.g, 1, P.w / 2, -P.h * .18, .001, _p3); else panelPoint(P, lx, ly, _p3);
       var k = seg(t, t0, t1);
       AL.w = 1; AL.target.copy(_q0).lerp(_p3, k);
-      if (lx >= 1 && k > .85) grip(AL, P.g, 1, P.w / 2, -P.h * .18, .001);      // держит панель за правую кромку
+      if (lx >= 1 && k > .85) grip(AL, P.g, 1, P.w / 2, -P.h * .18, .001, P.g);      // держит панель за правую кромку
     }
     var XL_IDLE = ["=ВПР(A2;Цены!A:B;2;0)", "=СУММЕСЛИ(A:A;\"Лампа\";D:D)", "=СЧЁТЕСЛИ(B2:B6;\">5\")", "=ЕСЛИ(D7>10000;\"ок\";\"мало\")", "=ОКРУГЛ(D7*1,2;0)", "=ИНДЕКС(A2:A6;ПОИСКПОЗ(МАКС(D2:D6);D2:D6;0))"];
     var WD_IDLE = ["Ctrl+S", "Оглавление ✓", "Стиль: Заголовок 1", "Нумерация страниц", "Колонтитулы ✓", "Разрыв страницы"];
@@ -2021,7 +2054,7 @@
         card.style.cursor = ov && (st === "play" || (st === "stand" && !held)) ? "pointer" : "";
         if (ov && st === "play") wake();
       }
-      updOcc(); updGrip(AL, dt); updGrip(AR, dt);
+      updOcc(); nudgeHeld(); updGrip(AL, dt); updGrip(AR, dt);
       updPanels(dt);
       if (warm) prewarm(--warm);
       gR.render(gScene, gCam);
