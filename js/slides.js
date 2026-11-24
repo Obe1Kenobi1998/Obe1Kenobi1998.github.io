@@ -1,7 +1,7 @@
 /* =====================================================================
    Слайд-шоу гарантий / отзывов: центральная карточка впереди, остальные
-   уходят в глубину слева и справа. Само листается, тянется пальцем/мышью,
-   стрелки, точки и клавиши ← →.
+   уходят в глубину слева и справа. Карусель медленно и плавно крутится сама
+   (у центра притормаживает), тянется пальцем/мышью, стрелки, точки и клавиши ← →.
    Данные: SITE.reviews (только реальные отзывы). Пока их нет — гарантии.
    ===================================================================== */
 (function () {
@@ -59,7 +59,11 @@
     dotsBox.appendChild(d); return d;
   });
 
-  var pos = 0, cur = 0, drag = null, timer = 0, paused = false, inView = false;
+  // pos — дробная позиция карусели (в карточках): карусель медленно и плавно крутится сама,
+  // у центра чуть притормаживает (чтобы успеть прочитать), под мышью — медленнее, при перетаскивании
+  // и фокусе с клавиатуры — стоит. Стрелки, точки и клавиши плавно доводят до карточки.
+  var pos = 0, drag = null, hover = false, focused = false, inView = false, tw = null, spd = 0, last = 0;
+  var DRIFT = 1 / 6.5;                       // карточек в секунду (в среднем одна за ~7 с)
   function wrapK(i, p) { var k = i - p; k = ((k % n) + n) % n; if (k > n / 2) k -= n; return k; }
   function layout(p) {
     var w = stage.clientWidth, cw = cards[0].offsetWidth || 300;
@@ -79,19 +83,33 @@
     });
     dots.forEach(function (d, i) { var on = i === ((Math.round(p) % n) + n) % n; d.classList.toggle("on", on); d.setAttribute("aria-selected", on ? "true" : "false"); });
   }
-  function go(i, instant) {
-    cur = i;
+  function easeOut(k) { return 1 - Math.pow(1 - k, 3); }
+  function go(i) {                            // плавно довести до карточки i (кратчайшим путём)
     var target = pos + wrapK(i, pos);
-    flow.classList.toggle("is-instant", !!instant);
-    pos = target; layout(pos);
-    restart();
+    if (reduce) { pos = target; layout(pos); return; }
+    tw = { from: pos, to: target, t0: performance.now(), dur: 700 + 260 * Math.min(3, Math.abs(target - pos)) };
+    spd = 0; kick();
   }
   function next() { go(Math.round(pos) + 1); }
   function prev() { go(Math.round(pos) - 1); }
-  function restart() {
-    clearInterval(timer);
-    if (reduce) return;
-    timer = setInterval(function () { if (!paused && inView && !drag && !document.hidden) next(); }, 3800);
+  var raf = 0;
+  function kick() { if (!raf) { last = 0; raf = requestAnimationFrame(frame); } }
+  function frame(now) {
+    raf = 0;
+    if (!inView || document.hidden) return;                    // вне экрана — не крутим
+    var dt = last ? Math.min((now - last) / 1000, .05) : 0; last = now;
+    if (drag) { raf = requestAnimationFrame(frame); return; }  // тянут рукой — позицию ведёт перетаскивание
+    if (tw) {
+      var k = Math.min(1, (now - tw.t0) / tw.dur);
+      pos = tw.from + (tw.to - tw.from) * easeOut(k); layout(pos);
+      if (k >= 1) tw = null;
+    } else if (!reduce) {
+      var f = Math.abs(pos - Math.round(pos)) * 2;              // 0 — карточка по центру, 1 — между карточками
+      var want = focused ? 0 : DRIFT * (hover ? .35 : 1) * (.35 + .65 * f) / .68;
+      spd += (want - spd) * (1 - Math.exp(-3 * dt));            // плавный разгон и торможение
+      if (spd > 1e-4) { pos += spd * dt; layout(pos); }
+    }
+    raf = requestAnimationFrame(frame);
   }
   flow.querySelector(".flow__nav--next").addEventListener("click", next);
   flow.querySelector(".flow__nav--prev").addEventListener("click", prev);
@@ -99,36 +117,36 @@
     if (e.key === "ArrowRight") { e.preventDefault(); next(); }
     if (e.key === "ArrowLeft") { e.preventDefault(); prev(); }
   });
-  flow.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") paused = true; });
-  flow.addEventListener("pointerleave", function () { paused = false; });
-  flow.addEventListener("focusin", function () { paused = true; });
-  flow.addEventListener("focusout", function () { paused = false; });
+  flow.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") hover = true; });
+  flow.addEventListener("pointerleave", function () { hover = false; });
+  flow.addEventListener("focusin", function (e) { focused = !!(e.target && e.target.matches && e.target.matches(":focus-visible")); });
+  flow.addEventListener("focusout", function () { focused = false; });
 
   // перетаскивание
   stage.addEventListener("pointerdown", function (e) {
     if (e.button !== 0) return;
+    tw = null;
     drag = { x: e.clientX, y: e.clientY, p0: pos, moved: false, id: e.pointerId, card: e.target.closest(".fcard") };
-    flow.classList.add("is-instant");
   });
   window.addEventListener("pointermove", function (e) {
     if (!drag || e.pointerId !== drag.id) return;
     var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
     if (!drag.moved && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) { drag.moved = true; try { stage.setPointerCapture(drag.id); } catch (er) {} }
-    if (drag.moved) { pos = drag.p0 - dx / Math.max(120, stage.clientWidth * .28); layout(pos); }
+    if (drag.moved) { pos = drag.p0 - dx / Math.max(120, stage.getBoundingClientRect().width * .28); layout(pos); }
   }, { passive: true });
   function endDrag(e) {
     if (!drag || (e && e.pointerId !== drag.id)) return;
     var d = drag; drag = null;
-    flow.classList.remove("is-instant");
     if (d.moved) { go(Math.round(pos)); return; }
     if (d.card) { var i = cards.indexOf(d.card); if (i >= 0 && Math.abs(wrapK(i, pos)) > .5) go(i); }
   }
   window.addEventListener("pointerup", endDrag);
   window.addEventListener("pointercancel", endDrag);
 
-  new IntersectionObserver(function (es) { inView = es[0].isIntersecting; }, { threshold: .25 }).observe(flow);
-  window.addEventListener("resize", function () { flow.classList.add("is-instant"); layout(pos); requestAnimationFrame(function () { flow.classList.remove("is-instant"); }); });
-  flow.classList.add("is-instant"); layout(0);
-  requestAnimationFrame(function () { requestAnimationFrame(function () { flow.classList.remove("is-instant"); }); });
-  restart();
+  // позиция меняется каждый кадр из JS — CSS-переход карточкам не нужен (иначе карусель «плывёт» с опозданием)
+  flow.classList.add("is-instant");
+  new IntersectionObserver(function (es) { inView = es[0].isIntersecting; if (inView) kick(); }, { threshold: .15 }).observe(flow);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) kick(); });
+  window.addEventListener("resize", function () { layout(pos); });
+  layout(0);
 })();

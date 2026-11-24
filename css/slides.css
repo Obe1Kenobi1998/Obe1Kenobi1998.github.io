@@ -1,11 +1,13 @@
 /* =====================================================================
-   СЛАЙД-ШОУ ГАРАНТИЙ: карточки уходят в глубину слева и справа
+   СЛАЙД-ШОУ ГАРАНТИЙ: карточки уходят в глубину слева и справа и медленно крутятся.
+   Сцена плоская (transform-style:flat): каждая карточка в перспективе, но рисуются по z-index —
+   при плавном вращении соседние карточки не «режут» друг друга.
    ===================================================================== */
 .section__head--center{margin-left:auto;margin-right:auto;text-align:center}
 .flow-sec{overflow:hidden}
 .flow{position:relative;height:440px;outline:none}
 .flow:focus-visible{outline:2px solid var(--gold);outline-offset:8px;border-radius:20px}
-.flow__stage{position:absolute;inset:0;perspective:1300px;perspective-origin:50% 45%;transform-style:preserve-3d;touch-action:pan-y;cursor:grab;user-select:none}
+.flow__stage{position:absolute;inset:0;perspective:1300px;perspective-origin:50% 45%;transform-style:flat;touch-action:pan-y;cursor:grab;user-select:none}
 .flow__stage:active{cursor:grabbing}
 .flow::before{content:"";position:absolute;left:50%;bottom:4px;width:min(620px,90%);height:60px;transform:translateX(-50%);border-radius:50%;
   background:radial-gradient(ellipse at center,rgba(150,110,40,.22),transparent 70%);filter:blur(6px);pointer-events:none}
