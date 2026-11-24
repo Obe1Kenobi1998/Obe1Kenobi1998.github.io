@@ -9,7 +9,10 @@
      с реквизитом: таблица с формулами, документ с колонтитулами, окно сайта,
      терминал, сборка EXE, игра с ИИ; поверх — всплывающие надписи (HTML).
    Руки сглаживаются (без рывков), значки и реквизит прогреваются заранее (без подвисаний).
-   Значки и панели робот держит детальными кистями-захватами (пальцы с шарнирами).
+   Значки и панели держит кистью как человек книгу: большой палец на лицевой стороне,
+   остальные пальцы сзади; отпустил — кисть остаётся на руке и раскрывается.
+   PDF: замах, бросок, полёт вокруг робота (и за головой), ловля в подставленные руки.
+   У коврика — ноутбук, планшет, папки, ящик с инструментами, кружка, значки на подставках.
    Слои: пол, кубики и мелочи (three.js) → робот (Spline) → копии кубиков с проверкой
    по невидимому «силуэту глубины» робота → значки, реквизит, кисти (three.js) → надписи.
    ===================================================================== */
@@ -440,6 +443,20 @@
       var sh = blob(play, .8);
       return { m: m, t: tc, s: c[1], sh: sh, where: "pile" };
     });
+    // на гранях кубиков — значки кода (как на детских кубиках буквы)
+    var GLYPH = [["{ }", "#4a3510"], ["</>", "#a8781f"], [">_", "#f0cd73"], ["fx", "#ffffff"], ["#", "#ffffff"]];
+    cubes.forEach(function (c, i) {
+      var t = canvasTex(128, function (x, s) {
+        x.clearRect(0, 0, s, s); x.fillStyle = GLYPH[i][1]; x.font = "800 " + (GLYPH[i][0].length > 2 ? 46 : 60) + "px 'JetBrains Mono', Consolas, monospace";
+        x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(GLYPH[i][0], s / 2, s / 2 + 3);
+      });
+      t.anisotropy = 4;
+      var mat = new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: .45, polygonOffset: true, polygonOffsetFactor: -2, depthWrite: false });
+      var pg = new THREE.PlaneGeometry(c.s * .62, c.s * .62);
+      [[0, 0, 1, 0, 0], [0, 0, -1, 0, PI], [1, 0, 0, 0, PI / 2], [-1, 0, 0, 0, -PI / 2], [0, 1, 0, -PI / 2, 0]].forEach(function (f) {
+        [c.m, c.t].forEach(function (m) { var d = new THREE.Mesh(pg, mat); d.position.set(f[0], f[1], f[2]).multiplyScalar(c.s / 2 + .001); d.rotation.set(f[3], f[4], 0); m.add(d); });
+      });
+    });
     var tower = [];
     function towerTop() { var h = 0; tower.forEach(function (c) { h += c.s; }); return h; }
     function pileSpot(c) {
@@ -486,7 +503,8 @@
     function layout() {
       var cr = card.getBoundingClientRect(), sr = sceneBox.getBoundingClientRect();
       W = Math.max(1, cr.width); H = Math.max(1, cr.height);
-      var pr = Math.min(window.devicePixelRatio || 1, W < 700 ? 1.5 : 1.75);
+      // на обычных мониторах рисуем в 1,5 раза чётче (мелкие предметы на полу не «мылятся»)
+      var dpr = window.devicePixelRatio || 1, pr = W < 700 ? Math.min(dpr, 1.5) : clamp(dpr, 1.5, 1.75);
       tR.setPixelRatio(pr); tR.setSize(W, H, false);
       gR.setPixelRatio(pr); gR.setSize(Math.max(1, sr.width), Math.max(1, sr.height), false);
     }
@@ -600,7 +618,7 @@
       if (!s) { A[key] = _tl.clone(); return; }
       var ang = Math.acos(clamp(s.dot(_tl), -1, 1));
       if (ang > 1e-4) {
-        var rate = st === "play" ? 30 : 17, vmax = st === "play" ? 12 : 7.5;
+        var rate = A.fast ? 40 : st === "play" ? 30 : 17, vmax = A.fast ? 18 : st === "play" ? 12 : 7.5;
         blendDir(s, s, _tl, Math.min(ang * (1 - Math.exp(-rate * dt)), vmax * dt) / ang, HINT_ARM_L);
       }
       _m2.fromArray(topP.matrixWorld.elements);
@@ -726,6 +744,7 @@
     function release() {
       var h = held; if (!h) return;
       busy = true; h.phase = "back"; hideSay(); propsOff(); clearFx(true);
+      if (h.g.parent !== tScene) tScene.add(h.g);
       look.mode = "icon"; look.speed = 7; look.tilt0 = 0; h.lift = 0;
       var cw0 = crouchW; tween(.45, function (k) { crouchW = cw0 * (1 - k); }, easeIO);
       var from = h.g.position.clone(), q0 = h.g.quaternion.clone(), qT = new Q();
@@ -752,6 +771,7 @@
     function dropHeldNow() {
       propsOff(true); clearFx(false);
       if (!held) return;
+      if (held.g.parent !== tScene) tScene.add(held.g);
       held.g.visible = false; held.tile.classList.remove("is-taken"); held = null; busy = false;
       AL.w = AR.w = 0;
     }
@@ -1042,162 +1062,266 @@
       setCapsule(OCC.head, _o1, _o2, HEAD_TOP * .42);
     }
 
-    /* ---------- кисти-захваты: детальные пальцы робота поверх значка и панели ----------
-       Пока рука держит значок или панель, родная кисть Spline прячется, а на её место встаёт
-       кисть-захват: четыре пальца по три фаланги с шарнирами лежат на лицевой стороне,
-       большой палец уходит за край, запястье смотрит на локоть. */
-    var gripMat = new THREE.MeshPhysicalMaterial({ color: 0x121215, metalness: .55, roughness: .26, clearcoat: 1, clearcoatRoughness: .1 });
-    var jointMat = new THREE.MeshPhysicalMaterial({ color: 0xb4b9c2, metalness: 1, roughness: .2 });
-    var tipMat = new THREE.MeshPhysicalMaterial({ color: 0x2b2e35, metalness: .7, roughness: .3, clearcoat: 1, clearcoatRoughness: .2 });
-    var capCache = {}, knuckleG = new THREE.SphereGeometry(1, 12, 10);
+    /* ---------- кисти-захваты ----------
+       Пока рука держит значок или панель, родная кисть Spline прячется, а вместо неё встаёт
+       кисть в том же чёрном глянце. Держит как человек книгу: большой палец лежит на лицевой
+       стороне, четыре пальца — сзади, ладонь у кромки, запястье продолжает линию предплечья.
+       Отпустил — кисть остаётся на руке и раскрывается, а не улетает вместе с предметом. */
+    var gripMat = new THREE.MeshPhysicalMaterial({ color: 0x060607, metalness: .2, roughness: .13, clearcoat: 1, clearcoatRoughness: .04 });
+    var jointMat = new THREE.MeshPhysicalMaterial({ color: 0x24262b, metalness: .9, roughness: .3 });
+    var padMat = new THREE.MeshPhysicalMaterial({ color: 0x141518, metalness: .05, roughness: .6 });
+    var capCache = {}, knuckleG = new THREE.SphereGeometry(1, 14, 10), ringG = new THREE.TorusGeometry(1.02, .16, 6, 20);
+    ringG.rotateY(PI / 2);
     function capX(L, r) {
       var key = L.toFixed(4) + "_" + r;
-      if (!capCache[key]) { var g = new THREE.CapsuleGeometry(r, Math.max(.001, L - 2 * r), 4, 10); g.rotateZ(-PI / 2); capCache[key] = g; }
+      if (!capCache[key]) { var g = new THREE.CapsuleGeometry(r, Math.max(.001, L - 2 * r), 5, 12); g.rotateZ(-PI / 2); g.translate(L / 2, 0, 0); capCache[key] = g; }
       return capCache[key];
     }
     function blockGeo(w, h, d, r) {            // скруглённый брусок: w — по X, h — по Y, d — по Z
       var g = new THREE.ExtrudeGeometry(rrShape(w - 2 * r, h - 2 * r, Math.min(w, h) * .16), { depth: Math.max(.001, d - 2 * r), bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelSegments: 3, curveSegments: 6 });
       g.center(); return g;
     }
+    // палец: цепочка фаланг вдоль +X, у каждой — шарнир (группа) с «костяшкой»
     function mkFinger(lens, r) {
       var root = new THREE.Group(), cur2 = root, segs = [];
       lens.forEach(function (L, i) {
-        var j = new THREE.Group(); if (i) j.position.x = lens[i - 1] * .92; cur2.add(j);
-        var kn = new THREE.Mesh(knuckleG, jointMat); kn.scale.setScalar(r * 1.2); j.add(kn);
-        var s = new THREE.Mesh(capX(L, r), i === lens.length - 1 ? tipMat : gripMat); s.position.x = L / 2; j.add(s);
+        var j = new THREE.Group(); if (i) j.position.x = lens[i - 1]; cur2.add(j);
+        var kn = new THREE.Mesh(knuckleG, gripMat); kn.scale.setScalar(r * 1.05); j.add(kn);
+        var s = new THREE.Mesh(capX(L, r * (1 - i * .06)), gripMat); j.add(s);
+        var ring = new THREE.Mesh(ringG, jointMat); ring.scale.setScalar(r); ring.position.x = r * .55; j.add(ring);   // шарнирное кольцо
         segs.push(j); cur2 = j;
       });
-      return { root: root, segs: segs };
+      return { root: root, segs: segs, lens: lens };
     }
-    var CURL_F = [.15, .3, .35], CURL_T = [-.15, -.35];
-    function mkGripHand() {
-      var Hg = new THREE.Group();
-      var palm = new THREE.Mesh(blockGeo(.072, .104, .108, .012), gripMat); palm.position.set(-.04, 0, .002); Hg.add(palm);
-      var plate = new THREE.Mesh(blockGeo(.05, .07, .012, .004), jointMat); plate.position.set(-.042, 0, .058); Hg.add(plate);
-      var led = new THREE.Mesh(knuckleG, new THREE.MeshBasicMaterial({ color: 0xf0cd73, toneMapped: false })); led.scale.setScalar(.0065); led.position.set(-.058, .026, .066); Hg.add(led);
-      var fingers = [-.036, -.012, .012, .036].map(function (y, i) {
-        var k = i === 0 || i === 3 ? .86 : 1;
-        var f = mkFinger([.042 * k, .032 * k, .026 * k], .0105); f.root.position.set(-.008, y, .044); Hg.add(f.root); return f;
+    // Система кисти: X — от запястья к пальцам (внутрь предмета), Z — нормаль лицевой стороны
+    // предмета (к камере), начало — на кромке предмета в плоскости его задней стороны.
+    var PALM = { x: -.047, z: -.021, w: .09, h: .088, d: .03 };
+    function mkGripHand(mirror) {
+      var Hg = new THREE.Group(); Hg.matrixAutoUpdate = false;
+      var palm = new THREE.Mesh(blockGeo(PALM.w, PALM.h, PALM.d, .011), gripMat); palm.position.set(PALM.x, 0, PALM.z); Hg.add(palm);
+      var pad = new THREE.Mesh(blockGeo(.062, .066, .006, .0025), padMat); pad.position.set(PALM.x - .006, -.004, PALM.z + PALM.d / 2 - .001); Hg.add(pad);
+      var back = new THREE.Mesh(blockGeo(.064, .07, .01, .004), gripMat); back.position.set(PALM.x + .004, 0, PALM.z - PALM.d / 2 - .002); Hg.add(back);
+      var bar = new THREE.Mesh(new THREE.CylinderGeometry(.0115, .0115, .086, 16), jointMat); bar.position.set(-.004, 0, -.013); Hg.add(bar);
+      var mound = new THREE.Mesh(knuckleG, gripMat); mound.scale.set(.03, .024, .018); mound.position.set(-.05, .034, -.01); Hg.add(mound);   // подушечка у большого пальца
+      var fingers = [-.031, -.0105, .0105, .031].map(function (y, i) {
+        var k = i === 0 ? .84 : i === 3 ? .9 : 1;
+        var f = mkFinger([.044 * k, .032 * k, .025 * k], .0102); f.root.position.set(-.002, y, -.012); Hg.add(f.root); return f;
       });
-      var thumb = mkFinger([.036, .03], .0118); thumb.root.position.set(-.008, 0, -.046); Hg.add(thumb.root);
-      var wrist = new THREE.Group(); wrist.position.set(-.07, 0, .002); Hg.add(wrist);
-      var wm = new THREE.Mesh(new THREE.CylinderGeometry(.03, .035, .1, 18), gripMat); wm.position.y = .05; wrist.add(wm);
-      var ring = new THREE.Mesh(new THREE.TorusGeometry(.032, .006, 8, 22), jointMat); ring.rotation.x = PI / 2; ring.position.y = .012; wrist.add(ring);
+      var thumb = mkFinger([.046, .042, .034], .014); Hg.add(thumb.root);
+      var wrist = new THREE.Group(); Hg.add(wrist);
+      var wm = new THREE.Mesh(new THREE.CylinderGeometry(.027, .031, 1, 20), gripMat); wm.position.y = .5; wrist.add(wm);
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(.03, .0055, 8, 24), jointMat); ring.rotation.x = PI / 2; ring.position.y = .004; wrist.add(ring);
       Hg.visible = false; tScene.add(Hg);
-      return { g: Hg, fingers: fingers, thumb: thumb, wrist: wrist };
+      return { g: Hg, fingers: fingers, thumb: thumb, wrist: wrist, wm: wm, mir: mirror ? -1 : 1 };
     }
-    AL.gh = mkGripHand(); AR.gh = mkGripHand(); AL.gw = AR.gw = 0;
-    // o — объект (половинка значка или панель), s — какой край (−1 левый, +1 правый), hw — полуширина, ly — высота хвата
-    function grip(A, o, s, hw, ly) { A.req = { o: o, s: s, hw: hw, ly: ly }; }
-    function gripIcon(A, g, side) { grip(A, g.halves[side < 0 ? 0 : 1], side, ICON / 2, -.03); }
-    var _gm = new M4(), _gb = new M4(), _gx = new V3(), _gy = new V3(), _gz = new V3(), _gp = new V3(), _ge = new V3();
+    AL.gh = mkGripHand(true); AR.gh = mkGripHand(false); AL.gw = AR.gw = 0;
+    [AL, AR].forEach(function (A) { A.hw = new M4(); A.rel = null; A.th = .03; A.tdir = new V3(.6, .8, 0); });
+    // o — объект (половинка значка или панель), s — какой край (−1 левый, +1 правый), hw — полуширина,
+    // ly — высота хвата, zf / zb — лицевая и задняя плоскости предмета (в его координатах)
+    function grip(A, o, s, hw, ly, zf, zb) { A.req = { o: o, s: s, hw: hw, ly: ly, zf: zf == null ? .001 : zf, zb: zb == null ? -.004 : zb }; }
+    function gripIcon(A, g, side) { grip(A, g.halves[side < 0 ? 0 : 1], side, ICON / 2, -.03, .001, -.029); }
+    var _gm = new M4(), _gb = new M4(), _gi = new M4(), _gx = new V3(), _gy = new V3(), _gz = new V3(), _gp = new V3(), _ge = new V3(), _gd = new V3(), _gs = new V3();
+    var _tq = new Q(), _tq2 = new Q(), _tv = new V3(), _tv2 = new V3(), _X1 = new V3(1, 0, 0), _gq = new Q();
+    // мировая матрица кисти по предмету: пальцы уходят за предмет внутрь и чуть вверх (~25°),
+    // ладонь — снаружи у кромки, ниже точки хвата; заодно направление большого пальца в системе кисти
+    var _gu = new V3(), _gt = new V3();
+    function handFromObj(A, out) {
+      var r = A.gObj, o = r.o;
+      o.updateMatrixWorld(true); _gm.copy(o.matrixWorld);
+      _gx.setFromMatrixColumn(_gm, 0).normalize(); _gu.setFromMatrixColumn(_gm, 1).normalize();
+      _gz.setFromMatrixColumn(_gm, 2); var sz = _gz.length(); _gz.multiplyScalar(1 / sz);
+      _gp.set(r.s * r.hw, r.ly, r.zb).applyMatrix4(_gm).addScaledVector(_gx, -r.s * .02 * K);
+      A.th = Math.max(.004, (r.zf - r.zb) * sz / K);
+      _gd.copy(_gx).multiplyScalar(-r.s).addScaledVector(_gu, .45).normalize();
+      _gy.crossVectors(_gz, _gd).normalize(); _gd.crossVectors(_gy, _gz);
+      _gt.copy(_gx).multiplyScalar(-r.s * .62).addScaledVector(_gu, .78);          // большой палец: вверх-внутрь по лицевой стороне
+      A.tdir.set(_gt.dot(_gd), _gt.dot(_gy) * A.gh.mir, 0).normalize();
+      _gb.makeBasis(_gd, _gy, _gz); _gq.setFromRotationMatrix(_gb);
+      return out.compose(_gp, _gq, _gs.set(K, K * A.gh.mir, K));
+    }
     function updGrip(A, dt) {
       var r = A.req, G = A.gh;
-      if (r && (!A.gObj || A.gw < .06 || (r.o === A.gObj.o && r.s === A.gObj.s))) A.gObj = r;
+      if (r && (!A.gObj || A.gw < .5 || (r.o === A.gObj.o && r.s === A.gObj.s))) A.gObj = r;
       var on = !!r && A.gObj === r;
-      A.gw = damp(A.gw, on ? 1 : 0, on ? 12 : 18, dt);
       var o = A.gObj && A.gObj.o;
-      var vis = A.gw > .02 && !!o && o.visible !== false && !(o.parent && o.parent.visible === false);
+      var objOk = !!o && o.visible !== false && !(o.parent && o.parent.visible === false);
+      if (on && !objOk) on = false;
+      A.gw = damp(A.gw, on ? 1 : 0, on ? 10 : 7, dt);
+      if (!on && !objOk && A.gw > .5) A.gw = .49;          // предмет исчез — кисть сразу обычная
+      var vis = A.gw > .5 && (on || !!A.rel);
       G.g.visible = vis;
-      if (A.hand) A.hand.visible = !(vis && A.gw > .45);
-      if (!vis) return;
-      o.updateMatrixWorld(true);
-      _gm.copy(o.matrixWorld);
-      _gx.setFromMatrixColumn(_gm, 0).normalize(); _gz.setFromMatrixColumn(_gm, 2).normalize();
-      _gp.set(A.gObj.s * A.gObj.hw, A.gObj.ly, 0).applyMatrix4(_gm);
-      _gx.multiplyScalar(-A.gObj.s); _gy.crossVectors(_gz, _gx).normalize(); _gz.crossVectors(_gx, _gy);
-      _gb.makeBasis(_gx, _gy, _gz); G.g.quaternion.setFromRotationMatrix(_gb);
-      G.g.position.copy(_gp); G.g.scale.setScalar(K * (.82 + .18 * A.gw));
-      var c = A.gw;
+      if (A.hand) A.hand.visible = !vis;
+      if (!vis) { if (A.gw < .02) A.rel = null; return; }
+      _gi.copy(A.fore.matrixWorld);
+      if (on) {                                             // на предмете; запоминаем положение относительно предплечья
+        handFromObj(A, A.hw);
+        A.rel = (A.rel || new M4()).copy(_gi).invert().multiply(A.hw);
+      } else A.hw.multiplyMatrices(_gi, A.rel);           // отпустил — кисть едет вместе с рукой
+      G.g.matrix.copy(A.hw); G.g.matrixWorldNeedsUpdate = true;
+      var c = sm((A.gw - .5) / .5), th = A.th;
+      // пальцы сзади: при хвате прижаты, при отпускании расходятся
       G.fingers.forEach(function (f, i) {
-        f.segs.forEach(function (j, n) { j.rotation.y = CURL_F[n] * c; });
-        f.root.rotation.z = (i - 1.5) * .06 * (1 - c * .6);          // раскрытые пальцы чуть веером
+        f.segs.forEach(function (j, n) { j.rotation.y = lerp(.16 + n * .04, .015 + n * .02, c); });
+        f.root.rotation.z = (i - 1.5) * .05 * (1 - c);
       });
-      G.thumb.segs.forEach(function (j, n) { j.rotation.y = CURL_T[n] * c; });
+      // большой палец: от основания ладони огибает кромку и ложится на лицевую сторону
+      var th0 = G.thumb, L0 = th0.lens[0];
+      _tv.set(-.03, .04, -.008);                                                                   // основание
+      _tv2.set(lerp(-.024, -.006, c), lerp(.068, .05, c), lerp(.006, th + .0145, c));               // конец пясти
+      th0.root.position.copy(_tv);
+      _gd.subVectors(_tv2, _tv); var mL = _gd.length(); _gd.multiplyScalar(1 / mL);
+      th0.root.quaternion.setFromUnitVectors(_X1, _gd);
+      th0.segs[0].children[1].scale.x = mL / L0; th0.segs[1].position.x = mL;
+      _gy.set(lerp(.45, A.tdir.x, c), lerp(.62, A.tdir.y, c), lerp(.62, 0, c)).normalize();          // фаланга 1: по лицевой стороне вверх-внутрь
+      _tq.copy(th0.root.quaternion).invert(); _gs.copy(_gy).applyQuaternion(_tq);
+      th0.segs[1].quaternion.setFromUnitVectors(_X1, _gs);
+      _gs.copy(_gy); _gs.z -= lerp(0, .3, c); _gs.normalize();                                      // фаланга 2 — прижата к лицевой стороне
+      _tq2.copy(th0.root.quaternion).multiply(th0.segs[1].quaternion).invert(); _gs.applyQuaternion(_tq2);
+      th0.segs[2].quaternion.setFromUnitVectors(_X1, _gs);
+      // запястье тянется к настоящему запястью робота (там, где у Spline начинается кисть)
+      if (A.hand) {
+        wpos(A.hand, _ge); G.g.updateMatrixWorld(true); _gi.copy(G.g.matrixWorld).invert(); _ge.applyMatrix4(_gi);
+        _gp.set(PALM.x - PALM.w / 2 + .012, 0, PALM.z);
+        _gd.subVectors(_ge, _gp); if (_gd.x > -.006) { _gd.x = -.03; } var wl = clamp(_gd.length(), .012, .13);
+        G.wrist.position.copy(_gp); G.wrist.quaternion.setFromUnitVectors(_UP, _gd.normalize());
+        G.wm.scale.y = wl; G.wm.position.y = wl / 2;
+      }
       G.g.updateMatrixWorld(true);
-      wpos(A.fore, _ge); G.g.worldToLocal(_ge); _ge.sub(G.wrist.position);
-      if (_ge.x > -.02) _ge.x = -.02;
-      G.wrist.quaternion.setFromUnitVectors(_UP, _ge.normalize());
     }
 
-    /* ---------- мелочи на полу у коврика: бумаги, ноутбук, планшет, значки, инструменты ---------- */
+    /* ---------- мелочи у коврика: ноутбук с кодом, планшет с сайтом, папки Word / Excel / PDF,
+       ящик с инструментами, кружка, значки на подставках. Всё стоит лицом к камере и достаточно
+       крупно, чтобы издалека читалось как вещь, а не как плоское пятно на полу. ---------- */
     (function () {
+      var ANI = Math.min(8, gR.capabilities.getMaxAnisotropy());
       function tex(w, h, draw) {
         var c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
-        var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; return t;
+        var t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = ANI; return t;
       }
-      function lines(x, X, Y, W, n, gap, col) { x.fillStyle = col || "#c9cfd8"; for (var i = 0; i < n; i++) { rr(x, X, Y + i * gap, W * (i % 3 === 2 ? .62 : .95), gap * .38, gap * .19); x.fill(); } }
-      var paperW = tex(192, 256, function (x, W) { x.fillStyle = "#fff"; x.fillRect(0, 0, W, 256); x.fillStyle = "#2b579a"; x.fillRect(0, 0, W, 26); x.fillStyle = "#1e2430"; rr(x, 16, 42, 120, 12, 6); x.fill(); lines(x, 16, 68, 160, 8, 20); });
-      var paperX = tex(256, 192, function (x, W, H) {
-        x.fillStyle = "#fff"; x.fillRect(0, 0, W, H); x.fillStyle = "#1d6f42"; x.fillRect(0, 0, W, 24);
-        x.strokeStyle = "#cfd8d2"; x.lineWidth = 2;
-        for (var i = 0; i < 7; i++) { x.beginPath(); x.moveTo(0, 40 + i * 22); x.lineTo(W, 40 + i * 22); x.stroke(); }
-        for (var j = 1; j < 4; j++) { x.beginPath(); x.moveTo(j * 64, 24); x.lineTo(j * 64, H); x.stroke(); }
-        x.fillStyle = "#1d6f42"; x.fillRect(194, 172, 56, 14);
+      function std(color, o) { o = o || {}; return new THREE.MeshPhysicalMaterial({ color: color, metalness: o.m == null ? .1 : o.m, roughness: o.r == null ? .4 : o.r, clearcoat: o.cc == null ? .5 : o.cc, clearcoatRoughness: .15 }); }
+      function scr(t) { return new THREE.MeshBasicMaterial({ map: t, toneMapped: false }); }
+      // редактор кода
+      var codeT = tex(640, 420, function (x, W, H) {
+        x.fillStyle = "#0f141b"; x.fillRect(0, 0, W, H);
+        x.fillStyle = "#1a212b"; x.fillRect(0, 0, W, 46); x.fillRect(0, 46, 54, H);
+        rr(x, 66, 8, 150, 38, 8); x.fillStyle = "#0f141b"; x.fill();
+        x.fillStyle = "#f0cd73"; x.beginPath(); x.arc(86, 27, 7, 0, 7); x.fill();
+        x.fillStyle = "#d7dde5"; x.font = fnt(19, 700, MONO); x.textBaseline = "middle"; x.fillText("robot.py", 100, 28);
+        var L = [[0, "#c39ae6", .2, "#5aa9e6", .34], [0, "#c39ae6", .16, "#e9ebee", .3], [0, null], [0, "#c39ae6", .12, "#4fbf85", .42], [1, "#e9ebee", .22, "#f0cd73", .3],
+          [1, "#c39ae6", .1, "#e9ebee", .4], [2, "#5aa9e6", .26, "#e2605c", .18], [1, "#c39ae6", .14, "#4fbf85", .3], [0, null], [0, "#7f8a99", .55]];
+        L.forEach(function (l, i) {
+          var y = 68 + i * 34;
+          x.fillStyle = "#4b5563"; x.font = fnt(17, 600, MONO); x.textAlign = "right"; x.fillText(String(i + 1), 40, y + 6); x.textAlign = "left";
+          if (!l[1]) return;
+          var X0 = 72 + l[0] * 34;
+          rr(x, X0, y - 4, W * l[2], 18, 9); x.fillStyle = l[1]; x.fill();
+          if (l[3]) { rr(x, X0 + W * l[2] + 12, y - 4, W * l[4], 18, 9); x.fillStyle = l[3]; x.fill(); }
+        });
+        x.fillStyle = "#4fbf85"; x.fillRect(72 + 34 * 1 + W * .22 + 12 + W * .3 + 6, 68 + 4 * 34 - 6, 4, 22);
       });
-      var paperP = tex(192, 256, function (x, W) {
-        x.fillStyle = "#fff"; x.fillRect(0, 0, W, 256); rr(x, 14, 14, 58, 30, 6); x.fillStyle = "#d93025"; x.fill();
-        x.fillStyle = "#fff"; x.font = "800 18px sans-serif"; x.textBaseline = "middle"; x.fillText("PDF", 22, 30); lines(x, 16, 64, 160, 9, 20);
+      // сайт
+      var webT = tex(640, 440, function (x, W, H) {
+        x.fillStyle = "#fffaf1"; x.fillRect(0, 0, W, H);
+        x.fillStyle = "#2a2f38"; x.fillRect(0, 0, W, 40);
+        ["#e2605c", "#e8a33d", "#4fbf85"].forEach(function (c, i) { x.beginPath(); x.arc(22 + i * 20, 20, 6.5, 0, 7); x.fillStyle = c; x.fill(); });
+        rr(x, 96, 9, W - 130, 22, 11); x.fillStyle = "#3a404b"; x.fill();
+        x.beginPath(); x.arc(46, 76, 14, 0, 7); x.fillStyle = "#e44d26"; x.fill();
+        rr(x, 70, 68, 110, 16, 8); x.fillStyle = "#1e1a15"; x.fill();
+        [0, 1, 2].forEach(function (i) { rr(x, W - 250 + i * 76, 70, 58, 12, 6); x.fillStyle = "#c9bfae"; x.fill(); });
+        rr(x, 34, 118, 300, 30, 10); x.fillStyle = "#1e1a15"; x.fill(); rr(x, 34, 158, 230, 30, 10); x.fill();
+        rr(x, 34, 204, 270, 13, 6); x.fillStyle = "#b7ab98"; x.fill(); rr(x, 34, 226, 210, 13, 6); x.fill();
+        rr(x, 34, 258, 170, 48, 16); x.fillStyle = "#e44d26"; x.fill();
+        x.fillStyle = "#fff"; x.font = fnt(20, 800); x.textAlign = "center"; x.fillText("Записаться", 119, 283); x.textAlign = "left";
+        var g = x.createLinearGradient(380, 110, 600, 310); g.addColorStop(0, "#f0cd73"); g.addColorStop(1, "#d9775a");
+        rr(x, 372, 108, 234, 196, 20); x.fillStyle = g; x.fill();
+        x.beginPath(); x.arc(489, 196, 40, 0, 7); x.fillStyle = "rgba(255,255,255,.55)"; x.fill();
+        [0, 1, 2].forEach(function (i) {
+          var X0 = 34 + i * 196; rr(x, X0, 330, 180, 92, 16); x.fillStyle = "#f3e7cf"; x.fill();
+          rr(x, X0 + 16, 346, 32, 32, 9); x.fillStyle = "#d4a84b"; x.fill();
+          rr(x, X0 + 60, 352, 100, 11, 5); x.fillStyle = "#c9bfae"; x.fill(); rr(x, X0 + 60, 372, 70, 11, 5); x.fill();
+        });
       });
-      var codeT = tex(256, 160, function (x, W, H) {
-        x.fillStyle = "#0f1720"; x.fillRect(0, 0, W, H); var cols = ["#e2605c", "#f0cd73", "#4fbf85", "#5aa9e6", "#c39ae6"];
-        for (var i = 0; i < 9; i++) { x.fillStyle = cols[i % 5]; rr(x, 14 + (i % 3) * 14, 12 + i * 16, 60 + (i * 37 % 110), 8, 4); x.fill(); }
+      // клавиатура
+      var keysT = tex(512, 200, function (x, W, H) {
+        x.fillStyle = "#23262c"; x.fillRect(0, 0, W, H);
+        for (var r2 = 0; r2 < 5; r2++) for (var k = 0; k < 14; k++) { rr(x, 8 + k * 35.8, 8 + r2 * 31, 30, 25, 5); x.fillStyle = r2 === 4 && k > 3 && k < 10 ? "#3a3e46" : "#353941"; x.fill(); }
+        rr(x, 8 + 4 * 35.8, 8 + 4 * 31, 6 * 35.8 - 6, 25, 5); x.fillStyle = "#3e434c"; x.fill();
       });
-      var webT = tex(256, 180, function (x, W, H) {
-        x.fillStyle = "#fffaf1"; x.fillRect(0, 0, W, H); x.fillStyle = "#2a2f38"; x.fillRect(0, 0, W, 22);
-        x.fillStyle = "#1e1a15"; rr(x, 16, 40, 120, 14, 7); x.fill(); rr(x, 16, 62, 90, 14, 7); x.fill();
-        x.fillStyle = "#e44d26"; rr(x, 16, 90, 70, 24, 10); x.fill(); x.fillStyle = "#f0cd73"; rr(x, 160, 36, 80, 80, 12); x.fill();
-        x.fillStyle = "#f3e7cf"; [0, 1, 2].forEach(function (i) { rr(x, 16 + i * 78, 130, 70, 40, 8); x.fill(); });
-      });
-      var stuff = new THREE.Group(), steel = new THREE.MeshPhysicalMaterial({ color: 0xb9bec7, metalness: 1, roughness: .25 });
-      function paper(t, w, d, x, z, ry, y) {
-        var m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ map: t, roughness: .9 }));
-        m.rotation.set(-PI / 2, 0, ry); m.position.set(x, y || .004, z); stuff.add(m);
+      // корешки папок
+      function spineT(col, label) {
+        return tex(512, 104, function (x, W, H) {
+          x.fillStyle = col; x.fillRect(0, 0, W, H);
+          var g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "rgba(255,255,255,.16)"); g.addColorStop(1, "rgba(0,0,0,.18)"); x.fillStyle = g; x.fillRect(0, 0, W, H);
+          rr(x, W / 2 - 110, 18, 220, H - 36, 12); x.fillStyle = "#fff"; x.fill();
+          x.fillStyle = col; x.font = fnt(46, 800); x.textAlign = "center"; x.textBaseline = "middle"; x.fillText(label, W / 2, H / 2 + 2);
+          x.beginPath(); x.arc(W - 58, H / 2, 16, 0, 7); x.fillStyle = "rgba(0,0,0,.28)"; x.fill();
+        });
       }
-      paper(paperW, .27, .36, -.92, .22, .5); paper(paperW, .27, .36, -.86, .28, .12, .006);
-      paper(paperX, .36, .27, .84, .06, -.35);
-      paper(paperP, .27, .36, -.64, -.5, .25); paper(paperP, .27, .36, -.6, -.46, -.12, .006);
-      // ноутбук с кодом (экран повёрнут к камере)
-      var lap = new THREE.Group(), metal = new THREE.MeshPhysicalMaterial({ color: 0x8c929c, metalness: .9, roughness: .3 });
-      var base = new THREE.Mesh(new THREE.BoxGeometry(.34, .014, .23), metal); base.position.y = .007; lap.add(base);
-      var keys = new THREE.Mesh(new THREE.PlaneGeometry(.29, .12), new THREE.MeshStandardMaterial({ color: 0x2b2e35, roughness: .6 })); keys.rotation.x = -PI / 2; keys.position.set(0, .0145, -.02); lap.add(keys);
-      var lid = new THREE.Group(); lid.position.set(0, .014, -.115); lid.rotation.x = -1.95; lap.add(lid);
-      var lidM = new THREE.Mesh(new THREE.BoxGeometry(.34, .01, .23), metal); lidM.position.z = .115; lid.add(lidM);
-      var scr = new THREE.Mesh(new THREE.PlaneGeometry(.31, .2), new THREE.MeshBasicMaterial({ map: codeT, toneMapped: false })); scr.rotation.x = PI / 2; scr.position.set(0, -.0058, .115); lid.add(scr);
-      lap.position.set(1.04, 0, .62); lap.rotation.y = -1.0; stuff.add(lap);
-      // планшет с сайтом
-      var tab = new THREE.Group();
-      var tb = new THREE.Mesh(new THREE.BoxGeometry(.3, .012, .21), new THREE.MeshPhysicalMaterial({ color: 0x1c1d21, metalness: .4, roughness: .3, clearcoat: 1 })); tb.position.y = .006; tab.add(tb);
-      var tsc = new THREE.Mesh(new THREE.PlaneGeometry(.27, .185), new THREE.MeshBasicMaterial({ map: webT, toneMapped: false })); tsc.rotation.x = -PI / 2; tsc.position.y = .0125; tab.add(tsc);
-      tab.position.set(.56, 0, -.58); tab.rotation.y = .5; stuff.add(tab);
-      // значки программ, разбросанные по полу
-      [["python", -1.1, .72, .8], ["excel", .64, 1.14, -.4], ["js", .24, -.8, .3], ["csharp", -.3, -.9, -.6], ["godot", 1.18, -.12, .9]].forEach(function (a) {
+      play.updateMatrixWorld(true);
+      var camL = play.worldToLocal(new V3(BOT0.x, 168, 1090)), FY = Math.atan2(camL.x, camL.z);
+      var RV = new V3(Math.cos(FY), 0, -Math.sin(FY)), FV = new V3(Math.sin(FY), 0, Math.cos(FY)), O = new V3(0, 0, .3);
+      var stuff = new THREE.Group();
+      // r — вправо (как видит камера), f — к камере; sh — размер тени
+      function put(o, r, f, yaw, sh) {
+        o.position.copy(O).addScaledVector(RV, r).addScaledVector(FV, f); o.rotation.y = FY + (yaw || 0); stuff.add(o);
+        if (sh) { var b = blob(play, .55); b.position.set(o.position.x, .003, o.position.z); b.scale.set(sh[0], sh[1], 1); }
+        return o;
+      }
+      var alu = std(0xaab0b9, { m: .9, r: .26, cc: .3 }), dark = std(0x1b1d22, { m: .4, r: .3, cc: 1 }), steel = std(0xc3c8d0, { m: 1, r: .22, cc: 0 });
+      // ноутбук: крышка почти вертикально, экран с кодом смотрит в камеру
+      var lap = new THREE.Group();
+      var base = new THREE.Mesh(blockGeo(.46, .31, .02, .007), alu); base.rotation.x = -PI / 2; base.position.y = .01; lap.add(base);
+      var kb = new THREE.Mesh(new THREE.PlaneGeometry(.4, .156), new THREE.MeshStandardMaterial({ map: keysT, roughness: .6 })); kb.rotation.x = -PI / 2; kb.position.set(0, .0205, -.035); lap.add(kb);
+      var pad = new THREE.Mesh(blockGeo(.13, .075, .002, .0008), std(0x9aa0a9, { m: .8, r: .35, cc: 0 })); pad.rotation.x = -PI / 2; pad.position.set(0, .0205, .095); lap.add(pad);
+      var lid = new THREE.Group(); lid.position.set(0, .02, -.15); lid.rotation.x = -.22; lap.add(lid);
+      var lb = new THREE.Mesh(blockGeo(.46, .3, .012, .005), alu); lb.position.set(0, .15, 0); lid.add(lb);
+      var bez2 = new THREE.Mesh(new THREE.PlaneGeometry(.44, .28), new THREE.MeshBasicMaterial({ color: 0x0b0d10 })); bez2.position.set(0, .15, .0062); lid.add(bez2);
+      var sc1 = new THREE.Mesh(new THREE.PlaneGeometry(.41, .27 * .97), scr(codeT)); sc1.position.set(0, .152, .0066); lid.add(sc1);
+      put(lap, .74, -.32, -.42, [.62, .46]);
+      // планшет с сайтом на подставке
+      var tab = new THREE.Group(), tg = new THREE.Group(); tg.rotation.x = -.26; tab.add(tg);
+      var tb = new THREE.Mesh(blockGeo(.38, .27, .016, .007), dark); tb.position.set(0, .14, 0); tg.add(tb);
+      var ts = new THREE.Mesh(new THREE.PlaneGeometry(.35, .24), scr(webT)); ts.position.set(0, .14, .0085); tg.add(ts);
+      var leg = new THREE.Mesh(new THREE.BoxGeometry(.12, .015, .16), dark); leg.position.set(0, .008, -.05); tab.add(leg);
+      var leg2 = new THREE.Mesh(new THREE.BoxGeometry(.03, .17, .012), dark); leg2.position.set(0, .08, -.09); leg2.rotation.x = .45; tab.add(leg2);
+      put(tab, -1.15, -.2, .36, [.5, .32]);
+      // папки Word / Excel / PDF стопкой, корешками к камере
+      [["#2b579a", "W", .036, .06, .1], ["#1d6f42", "X", .108, -.05, -.07], ["#d93025", "PDF", .18, .02, .13]].forEach(function (b) {
+        var col = new THREE.Color(b[0]), side = std(col, { r: .45, cc: .35 });
+        var mats = [side, side, std(col.clone().multiplyScalar(.92), { r: .5, cc: .3 }), side, new THREE.MeshStandardMaterial({ map: spineT(b[0], b[1]), roughness: .45 }), side];
+        var m = new THREE.Mesh(new THREE.BoxGeometry(.36, .072, .25), mats); m.position.set(b[3], b[2], 0); m.rotation.y = b[4];
+        var grp = new THREE.Group(); grp.add(m);
+        var pages = new THREE.Mesh(new THREE.BoxGeometry(.33, .05, .006), std(0xf6f1e6, { r: .8, cc: 0 })); pages.position.set(b[3], b[2], -.126); pages.rotation.y = b[4]; grp.add(pages);
+        put(grp, -.8, .48, .22, b[2] < .05 ? [.5, .38] : null);
+      });
+      // ящик с инструментами: на крышке отвёртка, слева прислонён гаечный ключ
+      var box = new THREE.Group(), red = std(0xc8372d, { r: .32, cc: .9 });
+      var body = new THREE.Mesh(blockGeo(.36, .14, .17, .01), red); body.position.y = .07; box.add(body);
+      var band = new THREE.Mesh(blockGeo(.365, .03, .175, .006), std(0x8f241d, { r: .35, cc: .8 })); band.position.y = .128; box.add(band);
+      var hdl = new THREE.Mesh(new THREE.TorusGeometry(.065, .011, 10, 24, PI), dark); hdl.position.set(0, .143, 0); box.add(hdl);
+      [-.11, .11].forEach(function (xx) { var l = new THREE.Mesh(blockGeo(.04, .03, .012, .003), steel); l.position.set(xx, .118, .088); box.add(l); });
+      var sdh = new THREE.Mesh(new THREE.CylinderGeometry(.017, .02, .095, 14), std(0xe8a33d, { r: .3, cc: 1 })); sdh.rotation.z = PI / 2; sdh.position.set(-.06, .162, .03); sdh.rotation.y = .3; box.add(sdh);
+      var sds = new THREE.Mesh(new THREE.CylinderGeometry(.005, .005, .12, 8), steel); sds.rotation.z = PI / 2; sds.position.set(.04, .162, .0); sds.rotation.y = .3; box.add(sds);
+      var wr = new THREE.Group(); wr.position.set(-.205, 0, .02); wr.rotation.set(0, 0, .32); box.add(wr);
+      var wh = new THREE.Mesh(blockGeo(.03, .19, .012, .004), steel); wh.position.y = .1; wr.add(wh);
+      var wj = new THREE.Mesh(new THREE.TorusGeometry(.03, .012, 8, 18, PI * 1.5), steel); wj.position.y = .215; wj.rotation.z = PI * .75; wr.add(wj);
+      put(box, .6, .62, -.25, [.58, .4]);
+      // кружка
+      var mug = new THREE.Group(), gold = std(0xd4a84b, { m: .55, r: .28, cc: 1 });
+      var mb = new THREE.Mesh(new THREE.CylinderGeometry(.052, .047, .11, 32), gold); mb.position.y = .055; mug.add(mb);
+      var cof = new THREE.Mesh(new THREE.CircleGeometry(.046, 28), new THREE.MeshStandardMaterial({ color: 0x3b2416, roughness: .3 })); cof.rotation.x = -PI / 2; cof.position.y = .1; mug.add(cof);
+      var mh = new THREE.Mesh(new THREE.TorusGeometry(.03, .009, 8, 20), gold); mh.position.set(.056, .058, 0); mug.add(mh);
+      put(mug, -.55, 1.25, -.3, [.2, .2]);
+      // значки на подставках, чуть откинуты назад
+      [["python", -1.0, 1.0, .25], ["js", .95, .12, -.3], ["csharp", -1.55, .28, .4], ["godot", -1.9, -.1, .45]].forEach(function (a) {
         if (!ICONS[a[0]] || !window.appIconCanvas) return;
-        var t = new THREE.CanvasTexture(window.appIconCanvas(a[0], 128)); t.encoding = THREE.sRGBEncoding;
-        var g = new THREE.Group();
-        var body = new THREE.Mesh(blockGeo(.16, .16, .024, .006), new THREE.MeshPhysicalMaterial({ color: new THREE.Color(ICONS[a[0]].c2), metalness: .2, roughness: .35, clearcoat: 1 }));
-        body.rotation.x = -PI / 2; body.position.y = .012; g.add(body);
-        var f = new THREE.Mesh(new THREE.PlaneGeometry(.152, .152), new THREE.MeshBasicMaterial({ map: t, toneMapped: false, transparent: true })); f.rotation.x = -PI / 2; f.position.y = .0246; g.add(f);
-        g.position.set(a[1], 0, a[2]); g.rotation.y = a[3]; stuff.add(g);
+        var t = new THREE.CanvasTexture(window.appIconCanvas(a[0], 256)); t.encoding = THREE.sRGBEncoding; t.anisotropy = ANI;
+        var g = new THREE.Group(), tilt = new THREE.Group(); tilt.rotation.x = -.2; g.add(tilt);
+        var bd = new THREE.Mesh(blockGeo(.24, .24, .03, .01), std(new THREE.Color(ICONS[a[0]].c2), { m: .2, r: .3, cc: 1 })); bd.position.set(0, .125, 0); tilt.add(bd);
+        var f = new THREE.Mesh(new THREE.PlaneGeometry(.232, .232), new THREE.MeshBasicMaterial({ map: t, toneMapped: false, transparent: true })); f.position.set(0, .125, .0156); tilt.add(f);
+        var st2 = new THREE.Mesh(blockGeo(.16, .028, .1, .008), dark); st2.position.set(0, .014, -.03); g.add(st2);
+        put(g, a[1], a[2], a[3], [.32, .2]);
       });
-      // инструменты: гаечный ключ, отвёртка, флешка, диск
-      var wr = new THREE.Group();
-      var hnd = new THREE.Mesh(new THREE.BoxGeometry(.22, .016, .036), steel); hnd.position.y = .008; wr.add(hnd);
-      var jaw = new THREE.Mesh(new THREE.TorusGeometry(.034, .013, 8, 18, PI * 1.55), steel); jaw.rotation.set(-PI / 2, 0, PI * .72); jaw.position.set(.13, .013, 0); wr.add(jaw);
-      var ring2 = new THREE.Mesh(new THREE.TorusGeometry(.027, .011, 8, 18), steel); ring2.rotation.x = -PI / 2; ring2.position.set(-.125, .011, 0); wr.add(ring2);
-      wr.position.set(.74, 0, -.2); wr.rotation.y = .8; stuff.add(wr);
-      var sd = new THREE.Group();
-      var sh1 = new THREE.Mesh(new THREE.CylinderGeometry(.021, .024, .1, 14), new THREE.MeshPhysicalMaterial({ color: 0xd9775a, roughness: .35, clearcoat: .8 })); sh1.rotation.z = PI / 2; sh1.position.set(-.05, .024, 0); sd.add(sh1);
-      var sh2 = new THREE.Mesh(new THREE.CylinderGeometry(.006, .006, .12, 8), steel); sh2.rotation.z = PI / 2; sh2.position.set(.06, .024, 0); sd.add(sh2);
-      sd.position.set(-1.14, 0, -.12); sd.rotation.y = -.5; stuff.add(sd);
-      var usb = new THREE.Group();
-      var ub = new THREE.Mesh(blockGeo(.09, .034, .02, .006), new THREE.MeshPhysicalMaterial({ color: 0x1c1b19, metalness: .3, roughness: .3, clearcoat: 1 })); ub.rotation.x = -PI / 2; ub.position.y = .01; usb.add(ub);
-      var uc = new THREE.Mesh(new THREE.BoxGeometry(.032, .013, .024), steel); uc.position.set(.058, .009, 0); usb.add(uc);
-      usb.position.set(1.0, 0, 1.06); usb.rotation.y = .4; stuff.add(usb);
-      var disc = new THREE.Mesh(new THREE.CylinderGeometry(.075, .075, .004, 40), new THREE.MeshPhysicalMaterial({ color: 0xe3e8ee, metalness: 1, roughness: .12, clearcoat: 1 }));
-      disc.position.set(-.3, .002, -.6); stuff.add(disc);
-      var hole = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, .005, 16), new THREE.MeshBasicMaterial({ color: 0xd8cdb8 })); hole.position.copy(disc.position); stuff.add(hole);
-      [[lap, .55, .42], [tab, .42, .32]].forEach(function (a) { var s = blob(play, .55); s.position.set(a[0].position.x, .003, a[0].position.z); s.scale.set(a[1], a[2], 1); s.rotation.z = a[0].rotation.y; });
       play.add(stuff); playTop.add(stuff.clone());
     })();
 
@@ -1243,6 +1367,22 @@
 
     /* ---------- сценки со значками: у каждого своя ---------- */
     var _p = new V3(), _p2 = new V3(), _p3 = new V3(), _q0 = new V3(), _tan = new V3(), _qp = new Q(), _qf = new Q();
+    // слой значка: tScene — всегда поверх робота, cScene — с проверкой по «силуэту» (может уйти за робота)
+    function layer(g, sc) { if (g.parent !== sc) sc.add(g); }
+    // ориентация в полёте: значок летит лицом к камере (логотип виден), а верхний край — «нос» — смотрит
+    // по ходу движения, с наклоном вперёд и креном. k: 0 — просто лицом к камере, 1 — полностью «в полёте»
+    var _fd = new V3();
+    function flyOrient(g, d, bank, k) {
+      faceCam(g);
+      if (k <= 0) return;
+      _fd.copy(d).applyAxisAngle(_ry, root.yaw).transformDirection(tCam.matrixWorldInverse);
+      g.rotateZ(Math.atan2(-_fd.x, _fd.y) * k); g.rotateX(-.55 * k); if (bank) g.rotateY(bank * .8 * k);
+    }
+    // траектория PDF (в «наших» координатах робота): вылет влево-вверх, дуга за головой, заход спереди-справа в руки
+    var PDF = { T0: .45, WU: .5, RL: .66, FL: 2.3, A: new V3(-.34, 1.64, .16), R: new V3(-.48, 1.8, .52), C: new V3(0, 1.33, .52) };
+    PDF.CA = PDF.RL + PDF.FL; PDF.CY = PDF.CA + 1.3; PDF.dir = PDF.R.clone().sub(PDF.A).normalize();
+    PDF.path = new THREE.CatmullRomCurve3([PDF.R.clone(), new V3(-.7, 1.95, .36), new V3(-.62, 2.02, -.15), new V3(-.2, 1.93, -.5),
+      new V3(.25, 1.89, -.5), new V3(.45, 1.9, -.1), new V3(.45, 1.66, .45), new V3(.3, 1.45, .8), PDF.C.clone()], false, "centripetal");
     var ovr = { cmd: 0, w: 0 };                 // поверх позы: например, руки в стороны для баланса
     function holdAt(g, x, y, z) { RL(x, y, z, g.position); faceCam(g); }
     function handsOn(g, w) {
@@ -1263,7 +1403,7 @@
       edgeW(h.g, 1, _q0); panelPoint(P, lx, ly, _p3);
       var k = seg(t, t0, t1);
       AL.w = 1; AL.target.copy(_q0).lerp(_p3, k);
-      if (lx >= 1 && k > .85) grip(AL, P.g, 1, P.w / 2, ly * P.h / 2);      // держит панель за правый край
+      if (lx >= 1 && k > .85) grip(AL, P.g, 1, P.w / 2, ly * P.h / 2, .001, -.003);      // держит панель за правый край
       else if (k < .15) gripIcon(AL, h.g, 1);
     }
     var XL_IDLE = ["=ВПР(A2;Цены!A:B;2;0)", "=СУММЕСЛИ(A:A;\"Лампа\";D:D)", "=СЧЁТЕСЛИ(B2:B6;\">5\")", "=ЕСЛИ(D7>10000;\"ок\";\"мало\")", "=ОКРУГЛ(D7*1,2;0)", "=ИНДЕКС(A2:A6;ПОИСКПОЗ(МАКС(D2:D6);D2:D6;0))"];
@@ -1427,7 +1567,7 @@
         P.s = { tt: typed(title, t, .8, 1.5), n: n, np: +np.toFixed(2), cur: t > .8 && t < 1.6 && Math.floor(t * 4) % 2 ? 1 : 0,
           hd: hd, ok: ok, ht: hd ? typed("ООО «Ромашка» · 2026", t, 1.95, 2.4) : "", hx: Math.round(hx), hr: +hr.toFixed(3),
           pg: broke ? "стр. 1 из 0" : "стр. 1 из 1", px: broke ? Math.round(Math.sin(t * 8) * 10) : 0 };
-        once(h, "hd", 1.95, function () { fx("Колонтитулы", "fx--wd", V(.2, 1.46, .52), { life: 1.8, rise: 60 }); });
+        once(h, "hd", 1.95, function () { fx("Колонтитулы", "fx--wd", V(-.3, 1.78, .4), { life: 1.6, rise: 50 }); });
         once(h, "br", 2.45, function () { fx("Колонтитулы?!", "fx--wd", V(.26, 1.5, .52), { life: 2, rise: 70 }); look.tilt0 = .2; });
         once(h, "q", 2.6, function () { fx("?", "fx--q", V(.24, 1.96, .2), { life: 1.6, rise: 16 }); });
         once(h, "sec", 2.85, function () { fx("Разрыв раздела", "fx--err", V(.24, .94, .52), { life: 1.8, rise: 50 }); });
@@ -1440,34 +1580,61 @@
         else if (t < 4.2) lookPanel(P, 0, .75);
         else if (((t - 4.2) % 5) < 3) lookPanel(P, -.2 + ((t * .8) % 1) * .6, .3); else look.mode = "cursor";
       },
-      // PDF: запускает самолётиком — облетает и возвращается в руки
+      // PDF: замах, бросок самолётиком — облетает робота (проходит и за головой) и прилетает
+      // в подставленные руки: руки заранее встают «на ловлю», значок тормозит, пальцы смыкаются
       pdf: function (h, t) {
-        var g = h.g, P0 = 3.6, u = t < .6 ? -1 : (t - .6) % P0, lap = Math.floor((t - .6) / P0);
+        var g = h.g, u = t < PDF.T0 ? -1 : (t - PDF.T0) % PDF.CY, lap = Math.floor((t - PDF.T0) / PDF.CY);
         RL(0, HOLD[1] + Math.sin(t * 2) * .01, HOLD[2], _p3);
-        if (u < 0 || u > 3.0) {                              // в руках, ждёт
-          g.position.copy(_p3); faceCam(g); handsOn(g); look.mode = "icon"; return;
-        }
-        if (u < .3) {                                        // замах
-          var k = seg(u, 0, .3);
-          holdAt(g, lerp(0, -.22, k), lerp(HOLD[1], 1.5, k), lerp(HOLD[2], .2, k));
-          AL.w = 1 - k; AR.w = 1; edgeW(g, -1, AR.target); edgeW(g, 1, AL.target); gripIcon(AR, g, -1); if (k < .3) gripIcon(AL, g, 1); return;
-        }
-        var th = (u - .3) / 2.7 * PI * 2;                     // петля
-        var fxp = function (a, o) { return o.set(-.22 - 1.15 * Math.sin(a), 1.5 + .3 * Math.sin(2 * a) + .18 * (1 - Math.cos(a)) - .2 * sm((a - PI * 1.6) / (PI * .4)), .2 + .45 * (1 - Math.cos(a)) + .22 * sm((a - PI * 1.6) / (PI * .4))); };
-        fxp(th, _p); fxp(th + .05, _p2);
-        RL(_p.x, _p.y, _p.z, g.position); RL(_p2.x, _p2.y, _p2.z, _tan);
-        g.lookAt(_tan); g.rotateX(-PI / 2 + .25); g.rotateZ(Math.sin(th) * .6);
-        var c = seg(th, PI * 1.65, PI * 2);
-        if (c > 0) { g.position.lerp(_p3, sm(c)); }
-        // ориентация: из «лицом к камере» в «самолёт» на взлёте и обратно при посадке — без щелчка
-        var wp = sm(th / (PI * .35)) * (1 - sm(c));
-        if (wp < 1) { _qp.copy(g.quaternion); faceCam(g); _qf.copy(g.quaternion); g.quaternion.copy(_qf).slerp(_qp, wp); }
-        AR.w = c > 0 ? c : 1 - seg(u, .3, .55); RL(-.24, 1.4, .3, AR.target);
-        if (c > 0) { edgeW(g, -1, _q0); AR.target.lerp(_q0, c); AL.w = c; edgeW(g, 1, AL.target); if (c > .85) { gripIcon(AL, g, 1); gripIcon(AR, g, -1); } } else AL.w = 0;
         look.mode = "icon"; look.speed = 8;
         once(h, "s", .9, function () { say(ICONS.pdf.say, 0, "info"); });
-        once(h, "pdf" + lap, .75 + lap * P0, function () { fx(lap ? "Отправлено.pdf" : "Сохранить как PDF", "fx--pdf", V(-.1, 1.85, .25), { life: 1.8, rise: 50 }); });
-        once(h, "back" + lap, 3.5 + lap * P0, function () { fx("Доставлено ✓", "fx--ok", V(.1, 1.75, .4), { life: 1.6, rise: 40 }); });
+        if (u < 0) { layer(g, tScene); g.position.copy(_p3); faceCam(g); handsOn(g); return; }
+        if (u < PDF.WU) {                                     // замах: правой рукой назад-вверх, нос самолётика вперёд
+          var k = easeIO(u / PDF.WU);
+          RL(lerp(0, PDF.A.x, k), lerp(HOLD[1], PDF.A.y, k), lerp(HOLD[2], PDF.A.z, k), g.position);
+          flyOrient(g, PDF.dir, 0, k);
+          AR.w = 1; AR.fast = 1; edgeW(g, -1, AR.target); gripIcon(AR, g, -1);
+          AL.w = 1 - seg(u, .04, .3); edgeW(g, 1, AL.target); if (u < .1) gripIcon(AL, g, 1);
+          return;
+        }
+        if (u < PDF.RL) {                                     // бросок: рука ведёт значок до точки отпускания
+          var k2 = (u - PDF.WU) / (PDF.RL - PDF.WU);
+          RL(lerp(PDF.A.x, PDF.R.x, k2), lerp(PDF.A.y, PDF.R.y, k2), lerp(PDF.A.z, PDF.R.z, k2), g.position);
+          flyOrient(g, PDF.dir, 0, 1);
+          AR.w = 1; AR.fast = 1; edgeW(g, -1, AR.target); gripIcon(AR, g, -1); AL.w = 0;
+          once(h, "pdf" + lap, PDF.T0 + lap * PDF.CY + PDF.WU, function () { fx(lap ? "Отправлено.pdf" : "Сохранить как PDF", "fx--pdf", V(-.1, 1.85, .25), { life: 1.8, rise: 50 }); });
+          return;
+        }
+        var ca = u - PDF.CA;                                  // время от момента ловли
+        if (ca < -.05) {                                      // полёт
+          var s = clamp((u - PDF.RL) / PDF.FL, 0, 1), ws = 1 - Math.pow(1 - s, 1.5);
+          layer(g, s < .8 ? cScene : tScene);                 // за головой — с «силуэтом», на заходе в руки — поверх
+          PDF.path.getPointAt(ws, _p); RL(_p.x, _p.y, _p.z, g.position);
+          PDF.path.getTangentAt(ws, _tan); PDF.path.getTangentAt(Math.min(1, ws + .04), _q0);
+          var bank = clamp((_tan.z * _q0.x - _tan.x * _q0.z) * 22, -.8, .8);
+          flyOrient(g, _tan, bank, 1 - sm((s - .74) / .24));
+        } else {                                              // поймал: значок по инерции чуть отжимает руки назад
+          layer(g, tScene);
+          var rk = seg(ca, 0, .32), back = Math.sin(rk * PI) * .07, set = seg(ca, .15, .8);
+          RL(lerp(PDF.C.x, 0, set), lerp(PDF.C.y, HOLD[1], set) - back * .25 + Math.sin(t * 2) * .01 * set, lerp(PDF.C.z, HOLD[2], set) - back, g.position);
+          faceCam(g);
+          once(h, "back" + lap, PDF.T0 + lap * PDF.CY + PDF.CA, function () { fx("Доставлено ✓", "fx--ok", V(.1, 1.75, .4), { life: 1.6, rise: 40 }); tween(.3, function (k3) { bump = Math.sin(k3 * PI) * .02; }, lin); });
+        }
+        // руки: правая доводит бросок и опускается, потом обе встают «на ловлю» и встречают значок
+        var fol = u - PDF.RL;
+        if (fol < .55) {
+          var fk = easeOut(seg(fol, 0, .3));
+          RL(PDF.R.x + PDF.dir.x * .3 * fk, PDF.R.y + PDF.dir.y * .3 * fk - .35 * seg(fol, .15, .55), PDF.R.z + PDF.dir.z * .3 * fk, AR.target);
+          AR.w = 1 - seg(fol, .2, .55); AR.fast = fol < .25 ? 1 : 0; AL.w = 0;
+        }
+        var rd = seg(u, PDF.CA - .9, PDF.CA - .35);
+        if (rd > 0) {
+          var meet = seg(u, PDF.CA - .4, PDF.CA - .04), sp = ICON / 2 + .13 * (1 - meet);
+          RL(PDF.C.x + sp, PDF.C.y - .02, PDF.C.z + .05, AL.target); RL(PDF.C.x - sp, PDF.C.y - .02, PDF.C.z + .05, AR.target);
+          if (meet > 0) { edgeW(g, 1, _q0); AL.target.lerp(_q0, meet); edgeW(g, -1, _q0); AR.target.lerp(_q0, meet); }
+          AL.w = AR.w = rd;
+          if (ca >= -.05) { gripIcon(AL, g, 1); gripIcon(AR, g, -1); }
+        }
+        if (ca > .8) handsOn(g);
       }
     };
 
@@ -1634,7 +1801,7 @@
 
     robot = { poke: function () { if (want && st === "play") wake(); } };
     // отладка: __robo.rec(true) — запись рывков суставов и долгих кадров, __robo.rec(false) — отчёт
-    var REC = null, _rq = new Q();
+    var REC = null, _rq = new Q(), TS = 1;
     function recFrame(rawDt, dt) {
       if (!REC) return;
       if (rawDt > 45) REC.hitch.push({ T: +T.toFixed(2), ms: Math.round(rawDt), st: st, held: held && held.id, ph: held && held.phase });
@@ -1673,10 +1840,16 @@
         var nn = Math.max(1, P.length - 2);
         return { jerk: r.jerk.slice(0, 80), n: r.jerk.length, hitch: r.hitch, minFoot: r.minFoot, iconJit: +(ji / nn * 1e4).toFixed(2), headJit: +(jh / nn * 1e4).toFixed(2) };
       },
+      speed: function (k) { TS = k > 0 ? k : 1; return TS; },
       scr: function (x, y, z) { var s = toScreen(RL(x, y, z, new V3())); return [Math.round(s.x), Math.round(s.y), Math.round(W), Math.round(H)]; },
       metrics: function () {
         var H0 = wpos(LL.hip, new V3()), S0 = wpos(LL.shin, new V3()), F0 = wpos(LL.foot, new V3());
-        return { K: K, thigh: H0.distanceTo(S0) / K, shin: S0.distanceTo(F0) / K, hipH: (H0.y - FLOOR) / K, kneeH: (S0.y - FLOOR) / K, ankleH: (F0.y - FLOOR) / K };
+        var hm = AL.hand, hb = null;
+        if (hm) { hm.geometry.computeBoundingBox(); var bb = hm.geometry.boundingBox.clone().applyMatrix4(hm.matrixWorld), sz = bb.getSize(new V3()).divideScalar(K);
+          var piv = wpos(hm, new V3()), cen = boxCenter(hm), el = wpos(AL.fore, new V3());
+          hb = { size: [sz.x, sz.y, sz.z].map(function (v) { return +v.toFixed(3); }), pivotToCenter: +(piv.distanceTo(cen) / K).toFixed(3), elbowToPivot: +(el.distanceTo(piv) / K).toFixed(3), elbowToCenter: +(el.distanceTo(cen) / K).toFixed(3), L1: +(AL.L1 / K).toFixed(3), L2: +(AL.L2 / K).toFixed(3),
+            local: [hm.position.x, hm.position.y, hm.position.z].map(function (v) { return +(v).toFixed(2); }), kids: hm.children.length, name: hm.name, foreKids: AL.fore.children.map(function (c) { return c.name + (c.isMesh ? "*" : ""); }) }; }
+        return { hand: hb, K: K, thigh: H0.distanceTo(S0) / K, shin: S0.distanceTo(F0) / K, hipH: (H0.y - FLOOR) / K, kneeH: (S0.y - FLOOR) / K, ankleH: (F0.y - FLOOR) / K };
       }
     };
 
@@ -1714,9 +1887,9 @@
       if (dead || !visible || document.hidden) { last = 0; return; }
       requestAnimationFrame(loop);
       var rawDt = last ? now - last : 16;
-      var dt = last ? Math.min((now - last) / 1000, .05) : .016; last = now;
+      var dt = (last ? Math.min((now - last) / 1000, .05) : .016) * TS; last = now;
       T += dt;
-      AL.req = AR.req = null;
+      AL.req = AR.req = null; AL.fast = AR.fast = 0;
       runAnims();
 
       if (walk.on) {

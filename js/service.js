@@ -70,16 +70,16 @@
   var nCats = $("sphCats"); if (nCats) nCats.textContent = D.cats.length - 1;
 
   // орбита значков в шапке страницы
-  var r1 = $("orbR1"), r2 = $("orbR2");
-  if (r1 && r2) {
-    var inner = D.tools.slice(0, 6), outer = D.tools.slice(6);
+  // все утилиты — на одном кольце вокруг андроида
+  var r2 = $("orbR2");
+  if (r2) {
     var put = function (list) {
       return list.map(function (t, i) {
         return '<button type="button" class="orb__it" style="--a:' + (360 / list.length * i).toFixed(2) + 'deg" data-tool="' + t.id + '" aria-label="' + esc(t.name) + '">' +
           '<span class="orb__tile">' + img(t, 56) + "<em>" + esc(t.name) + "</em></span></button>";
       }).join("");
     };
-    r1.innerHTML = put(inner); r2.innerHTML = put(outer);
+    r2.innerHTML = put(D.tools);
   }
 
   // симптомы

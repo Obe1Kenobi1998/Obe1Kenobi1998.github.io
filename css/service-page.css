@@ -57,8 +57,8 @@ body.svcp{--ticker-h:0px;--bg:#eef3e7;--tx:#14261b;--tx2:#43594a;--tx3:#6c8072;-
 .orb__glow{position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle,rgba(95,191,134,.45),rgba(214,190,110,.12) 55%,transparent 72%);filter:blur(30px);animation:orbBreath 6s ease-in-out infinite alternate}
 @keyframes orbBreath{to{transform:scale(1.08);opacity:.8}}
 .orb__ring{position:absolute;left:50%;top:50%;border-radius:50%;border:1.5px dashed rgba(47,143,91,.28);transform:translate(-50%,-50%)}
-.orb__ring--1{--r:calc(var(--S) * .29);width:calc(var(--r) * 2);height:calc(var(--r) * 2)}
-.orb__ring--2{--r:calc(var(--S) * .455);width:calc(var(--r) * 2);height:calc(var(--r) * 2);border-style:solid;border-color:rgba(47,143,91,.14)}
+.orb__ring--1{--r:calc(var(--S) * .375);width:calc(var(--r) * 2);height:calc(var(--r) * 2);border-color:rgba(47,143,91,.22);z-index:2;pointer-events:none}
+.orb__ring--2{--r:calc(var(--S) * .455);width:calc(var(--r) * 2);height:calc(var(--r) * 2);border-style:solid;border-color:rgba(47,143,91,.14);z-index:3}
 .orb__spin{position:absolute;inset:0;animation:orbSpin 70s linear infinite}
 .orb__ring--2 .orb__spin{animation-duration:95s;animation-direction:reverse}
 @keyframes orbSpin{to{transform:rotate(360deg)}}
@@ -76,13 +76,13 @@ body.svcp{--ticker-h:0px;--bg:#eef3e7;--tx:#14261b;--tx2:#43594a;--tx3:#6c8072;-
 .orb__it:hover{z-index:2}
 .orb__it:focus-visible{outline:none}
 .orb:hover .orb__spin,.orb:hover .orb__tile{animation-play-state:paused}
-.orb__core{position:absolute;left:50%;top:50%;width:calc(var(--S) * .36);height:calc(var(--S) * .36);transform:translate(-50%,-50%);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
-  color:#eaf5ec;background:radial-gradient(circle at 35% 30%,#3aa56b,#1d3f2b 70%);box-shadow:0 24px 50px rgba(29,63,43,.35),inset 0 1px 0 rgba(255,255,255,.25),0 0 0 10px rgba(255,255,255,.35)}
-.orb__pulse{width:62%;height:auto;overflow:visible}
+.orb__core{position:absolute;left:50%;top:calc(50% + var(--S) * .3);z-index:4;transform:translate(-50%,-50%);display:flex;align-items:center;gap:8px;padding:6px 14px 6px 10px;border-radius:999px;white-space:nowrap;
+  color:#eaf5ec;background:rgba(10,30,20,.84);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 12px 26px rgba(15,42,28,.32),inset 0 0 0 1px rgba(169,226,191,.28)}
+.orb__pulse{width:30px;height:auto;overflow:visible}
 .orb__pulse path{fill:none;stroke:#a9e2bf;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:orbPulse 2.4s ease-in-out infinite}
 @keyframes orbPulse{60%,100%{stroke-dashoffset:0}100%{opacity:0}}
-.orb__core b{font:700 clamp(12px,calc(var(--S) * .03),16px) var(--f-head)}
-.orb__core small{font:500 clamp(10px,calc(var(--S) * .022),12px) var(--f-mono);opacity:.75}
+.orb__core b{font:700 13px var(--f-head)}
+.orb__core small{font:500 11px var(--f-mono);opacity:.75}
 .orb__core em{font-style:normal;color:#a9e2bf}
 
 /* ---------- симптомы ---------- */
@@ -147,6 +147,21 @@ body.svcp{--ticker-h:0px;--bg:#eef3e7;--tx:#14261b;--tx2:#43594a;--tx3:#6c8072;-
 .svcp .footer__big{-webkit-text-stroke:1px #b9cfae;background-image:linear-gradient(90deg,#2f8f5b,#c7a74a)}
 .svcp .to-top:hover{color:var(--sv-acc)}
 
+/* центр орбиты: тёмно-зелёный диск-«портал», из которого выглядывает андроид (js/service-robot.js) */
+.orb__disc{position:absolute;left:50%;top:50%;width:calc(var(--S) * .7);height:calc(var(--S) * .7);transform:translate(-50%,-50%);border-radius:50%;overflow:hidden;z-index:1;
+  background:radial-gradient(circle at 50% 36%,#2f8558 0%,#1b4a31 46%,#0d2419 100%);
+  box-shadow:0 30px 60px rgba(20,52,34,.36),inset 0 0 0 1px rgba(169,226,191,.22),inset 0 -40px 70px rgba(0,0,0,.35),0 0 0 9px rgba(255,255,255,.42)}
+.orb__disc::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(169,226,191,.08) 0 1px,transparent 1px 16px),repeating-linear-gradient(90deg,rgba(169,226,191,.08) 0 1px,transparent 1px 16px);
+  -webkit-mask-image:radial-gradient(circle,#000 25%,transparent 70%);mask-image:radial-gradient(circle,#000 25%,transparent 70%)}
+.orb__scan{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,transparent 0 290deg,rgba(120,230,170,.22) 350deg,transparent 360deg);animation:orbSpin 5s linear infinite}
+.orb__bot{--D:calc(var(--S) * .7);position:absolute;left:50%;bottom:calc(50% - var(--D) / 2);width:var(--D);height:calc(var(--S) * .88);transform:translateX(-50%);z-index:2;pointer-events:none;
+  -webkit-mask-image:radial-gradient(circle calc(var(--D) / 2) at 50% calc(100% - var(--D) / 2),#000 calc(100% - 1.5px),transparent 100%),linear-gradient(#000,#000);
+  -webkit-mask-size:100% 100%,100% calc(100% - var(--D) / 2);-webkit-mask-position:center,top;-webkit-mask-repeat:no-repeat;
+  mask-image:radial-gradient(circle calc(var(--D) / 2) at 50% calc(100% - var(--D) / 2),#000 calc(100% - 1.5px),transparent 100%),linear-gradient(#000,#000);
+  mask-size:100% 100%,100% calc(100% - var(--D) / 2);mask-position:center,top;mask-repeat:no-repeat}
+.orb__bot canvas{display:block;width:100%;height:100%;opacity:0;transition:opacity .8s ease;filter:drop-shadow(0 0 14px rgba(85,240,176,.22)) drop-shadow(0 18px 24px rgba(5,20,12,.35))}
+.orb__bot.is-ready canvas{opacity:1}
+
 /* ---------- адаптив ---------- */
 @media (max-width:1100px){
   .sps__grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -156,6 +171,10 @@ body.svcp{--ticker-h:0px;--bg:#eef3e7;--tx:#14261b;--tx2:#43594a;--tx3:#6c8072;-
   .sph{grid-template-columns:minmax(0,1fr);min-height:0;padding-top:120px;gap:10px}
   .orb{--S:min(440px,86vw)}
   .sph__visual{margin-top:10px}
+  .orb__core{gap:6px;padding:5px 11px;top:calc(50% + var(--S) * .31)}
+  .orb__pulse{display:none}
+  .orb__core b{font-size:12px}
+  .orb__core small{font-size:10px}
 }
 @media (max-width:760px){
   .sph,.sps,.spt,.spw,.sp-help{padding:56px var(--gutter)}
@@ -170,6 +189,6 @@ body.svcp{--ticker-h:0px;--bg:#eef3e7;--tx:#14261b;--tx2:#43594a;--tx3:#6c8072;-
   .sph__stats b{font-size:24px}
 }
 @media (prefers-reduced-motion:reduce){
-  .orb__spin,.orb__tile,.orb__glow,.orb__pulse path{animation:none}
+  .orb__spin,.orb__tile,.orb__glow,.orb__pulse path,.orb__scan{animation:none}
   .orb__pulse path{stroke-dashoffset:0}
 }
