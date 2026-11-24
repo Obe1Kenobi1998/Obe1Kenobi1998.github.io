@@ -9,8 +9,9 @@
      с реквизитом: таблица с формулами, документ с колонтитулами, окно сайта,
      терминал, сборка EXE, игра с ИИ; поверх — всплывающие надписи (HTML).
    Руки сглаживаются (без рывков), значки и реквизит прогреваются заранее (без подвисаний).
-   Значки и панели держит своей же кистью (форма кисти Spline, согнутая кодом): за нижние углы,
-   большой палец на лицевой стороне, пальцы сзади; отпустил — кисть остаётся на руке и раскрывается.
+   Значки и панели держит своей же кистью (форма кисти Spline, согнутая кодом) как человек:
+   ладонь за предметом, пальцы по тыльной стороне, большой палец на лицевой; рука подстраивается
+   под кисть (локоть уходит так, чтобы предплечье продолжало кисть). Отпустил — кисть раскрывается.
    PDF: замах, бросок, полёт вокруг робота (и за головой), ловля в подставленные руки.
    У коврика — ноутбук, планшет, папки, ящик с инструментами, кружка, значки на подставках.
    Слои: пол, кубики и мелочи (three.js) → робот (Spline) → копии кубиков с проверкой
@@ -602,6 +603,7 @@
       var d = clamp(_dd.length(), Math.abs(A.L1 - A.L2) + 1, A.L1 + A.L2 - .5);
       _dd.normalize();
       _pole.copy(A.poleL).applyAxisAngle(_ry, root.yaw).normalize();
+      if (A.pk > .001) _pole.lerp(A.poleW, A.pk).normalize();             // при хвате локоть уходит назад вдоль кисти
       _n.crossVectors(_dd, _pole); if (_n.lengthSq() < 1e-6) _n.set(1, 0, 0); _n.normalize();
       var ang = Math.acos(clamp((A.L1 * A.L1 + d * d - A.L2 * A.L2) / (2 * A.L1 * d), -1, 1));
       upOut.copy(_dd).applyAxisAngle(_n, ang);
@@ -713,9 +715,10 @@
       return { pos: pos, s: Math.max(.15, r.width * wpp / (ICON * K)) };
     }
     var _o = new V3();
-    function edgeW(g, side, out) {   // нижний угол нужной половинки — туда кладётся кисть (центр кисти чуть ниже и позади)
+    function edgeW(g, side, out, A) {   // куда вести руку: центр кисти в позе хвата за кромку нужной половинки
       var h = g.halves[side < 0 ? 0 : 1];
-      return h.localToWorld(out.set(side * (ICON / 2 - .05), -ICON / 2 - .015, -.045));
+      if (typeof gripAim === "function" && GRIP) return gripAim(A || (side > 0 ? AL : AR), h, side, ICON / 2, -.03, -.029, out);
+      return h.localToWorld(out.set(side * (ICON / 2 + .02), -.03, 0));
     }
     function faceCam(g) { g.lookAt(tCam.position); }
 
@@ -1063,9 +1066,9 @@
     }
 
     /* ---------- кисти-захваты из родной кисти робота ----------
-       Берётся сама кисть Spline (та же форма, что у робота) и сгибается кодом, как держат планшет
-       за край: кисть идёт вдоль кромки, четыре пальца обхватывают предмет сзади, большой палец
-       лежит на лицевой стороне. Поза хвата — две морф-цели (тонкая панель и толстый значок),
+       Берётся сама кисть Spline (та же форма, что у робота) и сгибается кодом, как человек держит
+       книгу или планшет: ладонь за предметом, пальцы распрямлены по тыльной стороне, большой палец
+       развёрнут подушечкой к предмету и лежит на лицевой стороне. Поза хвата — две морф-цели (тонкая панель и толстый значок),
        пальцы сжимаются в момент касания и разжимаются, когда робот отпускает или бросает предмет.
        Отпустил — кисть остаётся на руке, а не улетает вместе с предметом. */
     var Q4 = THREE.Quaternion;
@@ -1076,9 +1079,13 @@
     }
     function sstep(a, b, x) { var k = (x - a) / (b - a); k = k < 0 ? 0 : k > 1 ? 1 : k; return k * k * (3 - 2 * k); }
     // Сырые координаты кисти Spline: Y — от запястья к пальцам, −Z — сторона ладони, большой палец со стороны −X.
-    // Предмет в позе хвата: плоскость YZ, задняя грань x = xb (за указательным пальцем), лицевая xb − t, кромка z = ze.
+    // Хват «как человек держит книгу»: предмет параллелен ладони и стоит перед ней (со стороны −Z),
+    // задняя грань z = zb, лицевая zb − t; предмет занимает x < XE (внутрь, к большому пальцу) и y > YE.
+    // Пальцы распрямлены и лежат на тыльной стороне, большой палец развёрнут подушечкой к предмету,
+    // выходит вперёд и ложится на лицевую сторону с наклоном внутрь; снизу видны пятка ладони и запястье.
+    var GP = { XE: 7, YE: 20 };
     function gripPose(P, N, t) {
-      var n = P.length / 3, i, x, y, ZE = -1.5, FC = .35, TF = .12;
+      var n = P.length / 3, i, x, y, YE = GP.YE;
       var wT = new Float32Array(n), wF = new Float32Array(n);
       for (i = 0; i < n; i++) {
         x = P[3 * i]; y = P[3 * i + 1];
@@ -1086,7 +1093,7 @@
         var th = (a + (b - a) * sstep(25, 27.5, y)) * sstep(7, 13, y) * (1 - sstep(35.5, 37.5, y));
         wT[i] = th; wF[i] = (1 - th) * sstep(25.5, 28.5, y);
       }
-      var Q = new Float32Array(P), M = new Float32Array(N), v = new V3(), nv = new V3(), I = new Q4(), qw = new Q4(), X = new V3(1, 0, 0);
+      var Q = new Float32Array(P), M = new Float32Array(N), v = new V3(), nv = new V3(), I = new Q4(), qw = new Q4(), X = new V3(1, 0, 0), Z = new V3(0, 0, 1);
       function rot(idx, qq, pv, w) {            // поворот на долю w полного поворота qq вокруг точки pv (по углу)
         if (w < 1e-4) return;
         qw.copy(I).slerp(qq, w);
@@ -1094,27 +1101,29 @@
         Q[3 * idx] = v.x; Q[3 * idx + 1] = v.y; Q[3 * idx + 2] = v.z;
         nv.set(M[3 * idx], M[3 * idx + 1], M[3 * idx + 2]).applyQuaternion(qw); M[3 * idx] = nv.x; M[3 * idx + 1] = nv.y; M[3 * idx + 2] = nv.z;
       }
-      // пальцы сгибаются в трёх суставах — обхватывают предмет сзади
+      // 1) пальцы распрямляются в средних и концевых суставах и ложатся на тыльную сторону
       var pivM = new V3(0, 27, 4.5), pivP = new V3(0, 33.5, 3.8), pivD = new V3(0, 39, 0);
-      var qm = new Q4().setFromAxisAngle(X, -FC), qp = new Q4().setFromAxisAngle(X, -FC * 1.2), qd = new Q4().setFromAxisAngle(X, -FC * .8);
+      var qd = new Q4().setFromAxisAngle(X, .4), qp = new Q4().setFromAxisAngle(X, .45), qm = new Q4().setFromAxisAngle(X, -.05);
       for (i = 0; i < n; i++) {
         if (wF[i] < 1e-3) continue;
         y = P[3 * i + 1];
         rot(i, qd, pivD, wF[i] * sstep(37.5, 40.5, y)); rot(i, qp, pivP, wF[i] * sstep(32, 35, y)); rot(i, qm, pivM, wF[i]);
       }
-      var xb = 1e9; for (i = 0; i < n; i++) if (wT[i] < .05 && Q[3 * i + 2] < ZE && Q[3 * i + 1] > 8) xb = Math.min(xb, Q[3 * i]);
-      xb -= .35;
-      // большой палец плавно отходит от пальцев на толщину предмета (сдвиг нарастает от основания)
-      // и чуть наклоняется вдоль лицевой стороны
-      var mx = -1e9; for (i = 0; i < n; i++) if (wT[i] > .9 && P[3 * i + 1] > 18 && Q[3 * i + 2] < ZE + 1) mx = Math.max(mx, Q[3 * i]);
-      var d = Math.max(0, mx - (xb - t - .25)), C2 = new V3(-15, 23, 0), r2 = new Q4().setFromAxisAngle(X, -TF);
-      for (i = 0; i < n; i++) {
-        if (wT[i] < 1e-3) continue;
-        y = P[3 * i + 1];
-        rot(i, r2, C2, wT[i] * sstep(20, 25, y));
-        Q[3 * i] -= d * wT[i] * sstep(8, 21, y);
-      }
-      return { P: Q, N: M, xb: xb, ze: ZE };
+      // 2) большой палец разворачивается вокруг своей оси подушечкой к предмету
+      var tAx = new V3(.05, .98, -.18).normalize(), tC = new V3(-14.6, 24, 0), qtw = new Q4().setFromAxisAngle(tAx, -1.1);
+      for (i = 0; i < n; i++) if (wT[i] > 1e-3) rot(i, qtw, tC, wT[i] * sstep(11, 19, P[3 * i + 1]));
+      // задняя грань — перед всем, что не большой палец, в области предмета
+      var zb = 1e9; for (i = 0; i < n; i++) if (wT[i] < .05 && Q[3 * i + 1] > YE) zb = Math.min(zb, Q[3 * i + 2]);
+      zb -= .3;
+      var zf = zb - t;
+      // 3) большой палец плавно выходит вперёд за лицевую сторону: сдвиг нарастает от основания к нижней кромке
+      var mz = -1e9; for (i = 0; i < n; i++) if (wT[i] > .9 && Q[3 * i + 1] > YE - .5) mz = Math.max(mz, Q[3 * i + 2]);
+      var dz = Math.max(0, mz - (zf - .3));
+      for (i = 0; i < n; i++) if (wT[i] > 1e-3) Q[3 * i + 2] -= dz * wT[i] * sstep(8, YE, P[3 * i + 1]);
+      // 4) дальняя часть пальца чуть наклоняется внутрь (основание остаётся под нижней кромкой)
+      var CT = new V3(-15.5, 22, zf - 4), qi = new Q4().setFromAxisAngle(Z, .45);
+      for (i = 0; i < n; i++) if (wT[i] > 1e-3) rot(i, qi, CT, wT[i] * sstep(20, 27, P[3 * i + 1]));
+      return { P: Q, N: M, zb: zb };
     }
     var GRIP = (function () {
       var src = AL.hand && AL.hand.geometry;
@@ -1128,9 +1137,9 @@
       g.morphAttributes.position = [new THREE.BufferAttribute(thin.P, 3), new THREE.BufferAttribute(thick.P, 3)];
       g.morphAttributes.normal = [new THREE.BufferAttribute(thin.N, 3), new THREE.BufferAttribute(thick.N, 3)];
       g.computeBoundingSphere();
-      return { geo: g, xb: thin.xb, ze: thin.ze, T0: 1, T1: 7.7 };
+      return { geo: g, zb: thin.zb, T0: 1, T1: 7.7 };
     })();
-    var GY = 22, TAU = .22;                    // точка хвата по длине сырой кисти и наклон кисти пальцами вверх
+    var GT = { tau: .5, ye: 19, xc: -4 };      // наклон пальцев вверх; где по сырой кисти проходит кромка; середина ладони
     function mkGripHand() {
       var Hg = new THREE.Group(); Hg.matrixAutoUpdate = false;
       var m = null;
@@ -1142,27 +1151,42 @@
     [AL, AR].forEach(function (A) {
       A.hw = new M4(); A.rel = null; A.th = 7.7;
       A.hs = A.hand ? new V3().setFromMatrixScale(A.hand.matrixWorld).x : K * .0039;     // единиц мира на единицу сырой кисти
+      A.dsgn = A.hand && A.hand.matrixWorld.determinant() < 0 ? -1 : 1;                   // зеркальная ли родная кисть (левая/правая)
+      A.poleW = new V3(); A.pk = 0; A.pkT = 0;
     });
     // o — объект (половинка значка или панель), s — какой нижний угол (−1 левый, +1 правый), hw / hh — полуширина
     // и полувысота, zf / zb — лицевая и задняя плоскости предмета (в его координатах)
-    function grip(A, o, s, hw, hh, zf, zb) { if (GRIP) A.req = { o: o, s: s, hw: hw, hh: hh, zf: zf == null ? .001 : zf, zb: zb == null ? -.004 : zb }; }
-    function gripIcon(A, g, side) { grip(A, g.halves[side < 0 ? 0 : 1], side, ICON / 2, ICON / 2, .001, -.029); }
+    function grip(A, o, s, hw, ly, zf, zb) { if (GRIP) A.req = { o: o, s: s, hw: hw, ly: ly, zf: zf == null ? .001 : zf, zb: zb == null ? -.004 : zb }; }
+    function gripIcon(A, g, side) { grip(A, g.halves[side < 0 ? 0 : 1], side, ICON / 2, -.03, .001, -.029); }
     var _gm = new M4(), _gi = new M4(), _gx = new V3(), _gu = new V3(), _gz = new V3(), _gp = new V3(), _gd = new V3(), _gt = new V3(), _gn = new V3(), _ge = new V3();
-    // мировая матрица кисти по предмету: хват за нижнюю кромку у угла, кисть идёт вдоль кромки внутрь
-    // (продолжает предплечье, пришедшее сбоку-снизу). Сырые −X → лицевая сторона предмета, Y → вдоль
-    // кромки внутрь и чуть вверх, Z → вниз от кромки. Для левого угла матрица зеркальная — это вторая рука.
+    // Кисть ставится у кромки предмета, как держит человек: ладонь за предметом, пальцы по тыльной стороне —
+    // внутрь и чуть вверх, большой палец на лицевой стороне (с какой стороны — решает анатомия левой/правой
+    // руки). Под эту кисть подстраивается рука: центр кисти — цель для руки, а локоть уводится назад вдоль
+    // кисти, чтобы предплечье продолжало её линию, а не подходило сбоку.
+    var _f1 = new V3(), _f2 = new V3(), _f3 = new V3(), _fm = new M4(), _fX = new V3(), _fY = new V3(), _fZ = new V3(), _fO = new V3();
+    function gripFrame(o, s, hw, ly, zb, dsgn, hs) {          // → _fO (начало), _fX, _fY, _fZ (единичные оси сырой кисти)
+      o.updateMatrixWorld(true); _fm.copy(o.matrixWorld);
+      _f1.setFromMatrixColumn(_fm, 0).normalize(); _f2.setFromMatrixColumn(_fm, 1).normalize(); _f3.setFromMatrixColumn(_fm, 2).normalize();
+      _fY.copy(_f1).multiplyScalar(-s * Math.cos(GT.tau)).addScaledVector(_f2, Math.sin(GT.tau));      // пальцы: внутрь и вверх
+      _fZ.copy(_f3).negate();                                                                           // от камеры
+      _fX.crossVectors(_fY, _fZ).normalize(); if (dsgn < 0) _fX.negate();                               // левая / правая
+      _fO.set(s * hw, ly, zb).applyMatrix4(_fm)
+        .addScaledVector(_fX, -GT.xc * hs).addScaledVector(_fY, -GT.ye * hs).addScaledVector(_fZ, -(GRIP ? GRIP.zb : 0) * hs);
+    }
     function handFromObj(A, out) {
       var r = A.gObj, o = r.o, hs = A.hs;
-      o.updateMatrixWorld(true); _gm.copy(o.matrixWorld);
-      _gx.setFromMatrixColumn(_gm, 0).normalize(); _gu.setFromMatrixColumn(_gm, 1).normalize();
-      _gz.setFromMatrixColumn(_gm, 2); var sz = _gz.length(); _gz.multiplyScalar(1 / sz);
-      A.th = clamp((r.zf - r.zb) * sz / hs, GRIP.T0, GRIP.T1);
-      _gp.set(r.s * r.hw, -r.hh, r.zb).applyMatrix4(_gm).addScaledVector(_gx, -r.s * GY * hs * .9);   // нижняя кромка у угла, задняя плоскость
-      _gd.copy(_gx).multiplyScalar(-r.s * Math.cos(TAU)).addScaledVector(_gu, Math.sin(TAU));       // вдоль кромки внутрь
-      _gt.crossVectors(_gd, _gz).normalize(); if (_gt.dot(_gu) > 0) _gt.negate();            // вниз от кромки
-      _gn.copy(_gz).negate();
-      _ge.copy(_gp).addScaledVector(_gn, -GRIP.xb * hs).addScaledVector(_gd, -GY * hs).addScaledVector(_gt, -GRIP.ze * hs);
-      out.makeBasis(_gn.multiplyScalar(hs), _gd.multiplyScalar(hs), _gt.multiplyScalar(hs)); out.setPosition(_ge);
+      _gz.setFromMatrixColumn(o.matrixWorld, 2);
+      A.th = clamp((r.zf - r.zb) * _gz.length() / hs, GRIP.T0, GRIP.T1);
+      gripFrame(o, r.s, r.hw, r.ly, r.zb, A.dsgn, hs);
+      out.makeBasis(_gt.copy(_fX).multiplyScalar(hs), _gd.copy(_fY).multiplyScalar(hs), _gn.copy(_fZ).multiplyScalar(hs)); out.setPosition(_fO);
+      return out;
+    }
+    // цель для руки — центр кисти в позе хвата; локоть — назад вдоль кисти
+    function gripAim(A, o, s, hw, ly, zb, out) {
+      var hs = A.hs || K * .0039;
+      gripFrame(o, s, hw, ly, zb, A.dsgn || 1, hs);
+      out.copy(_fO).addScaledVector(_fX, -5.6 * hs).addScaledVector(_fY, 19 * hs).addScaledVector(_fZ, .5 * hs);
+      A.poleW.copy(_fY).negate().addScaledVector(_fZ, .35).normalize(); A.pkT = 1;
       return out;
     }
     function updGrip(A, dt) {
@@ -1400,14 +1424,13 @@
     function iconRight(h, t, lift) {
       var g = h.g; fromHold(t, .7, -.37, (lift || 1.46) + Math.sin(t * 1.8) * .012, .34);
       holdAt(g, _p.x, _p.y, _p.z); g.rotateZ(.12 * seg(t, 0, .7));
-      AR.w = 1; edgeW(g, -1, AR.target); gripIcon(AR, g, -1);
+      AR.w = 1; edgeW(g, 1, AR.target, AR); gripIcon(AR, g, 1);
     }
     function leftTo(h, t, P, lx, ly, t0, t1) {
-      edgeW(h.g, 1, _q0); panelPoint(P, lx, ly, _p3);
+      edgeW(h.g, 1, _q0, AL); if (lx >= 1) gripAim(AL, P.g, 1, P.w / 2, ly * P.h / 2, -.003, _p3); else panelPoint(P, lx, ly, _p3);
       var k = seg(t, t0, t1);
       AL.w = 1; AL.target.copy(_q0).lerp(_p3, k);
-      if (ly <= -1 && k > .85) grip(AL, P.g, 1, P.w / 2, P.h / 2, .001, -.003);      // держит панель за правый нижний угол
-      else if (k < .15) gripIcon(AL, h.g, 1);
+      if (lx >= 1 && k > .85) grip(AL, P.g, 1, P.w / 2, ly * P.h / 2, .001, -.003);      // держит панель за правый край
     }
     var XL_IDLE = ["=ВПР(A2;Цены!A:B;2;0)", "=СУММЕСЛИ(A:A;\"Лампа\";D:D)", "=СЧЁТЕСЛИ(B2:B6;\">5\")", "=ЕСЛИ(D7>10000;\"ок\";\"мало\")", "=ОКРУГЛ(D7*1,2;0)", "=ИНДЕКС(A2:A6;ПОИСКПОЗ(МАКС(D2:D6);D2:D6;0))"];
     var WD_IDLE = ["Ctrl+S", "Оглавление ✓", "Стиль: Заголовок 1", "Нумерация страниц", "Колонтитулы ✓", "Разрыв страницы"];
@@ -1533,7 +1556,7 @@
       excel: function (h, t) {
         iconRight(h, t);
         var P = props.sheet; P.on = t > .3; placePanel(P, .13, 1.08 + Math.sin(t * 1.5) * .008, .52, -.05);
-        leftTo(h, t, P, .8, -1.06, .25, .8);
+        leftTo(h, t, P, 1.0, -.4, .25, .8);
         var f1 = "=СУММ(D2:D6)", f2 = "=СУММ(ЗНАЧЕН(D2:D6))", f = "", r = 0, sel = [4, 7];
         if (t < .9) sel = [4, 2 + Math.floor(t * 5) % 5];
         else if (t < 1.6) f = typed(f1, t, .9, 1.55);
@@ -1563,7 +1586,7 @@
       word: function (h, t) {
         iconRight(h, t);
         var P = props.doc; P.on = t > .3; placePanel(P, .16, 1.14 + Math.sin(t * 1.4) * .008, .52, -.05);
-        leftTo(h, t, P, .8, -1.06, .25, .8);
+        leftTo(h, t, P, 1.0, -.4, .25, .8);
         var title = "Договор на разработку", hd = t > 1.9 ? 1 : 0, ok = t > 3.35 ? 1 : 0;
         var broke = t > 2.4 && t < 3.35, hx = broke ? Math.sin(t * 9) * 26 + 18 : 0, hr = broke ? Math.sin(t * 7) * .06 : 0;
         var n = t < 1.5 ? 0 : Math.min(6, 1 + Math.floor((t - 1.5) / .12)), np = n < 6 ? clamp(((t - 1.5) % .12) / .12, .2, 1) : 1;
@@ -1892,7 +1915,7 @@
       var rawDt = last ? now - last : 16;
       var dt = (last ? Math.min((now - last) / 1000, .05) : .016) * TS; last = now;
       T += dt;
-      AL.req = AR.req = null; AL.fast = AR.fast = 0;
+      AL.req = AR.req = null; AL.fast = AR.fast = 0; AL.pkT = AR.pkT = 0;
       runAnims();
 
       if (walk.on) {
@@ -1910,6 +1933,7 @@
 
       ovr.cmd = 0;
       if (held && held.phase === "act" && ACTS[held.id]) { held.t += dt; ACTS[held.id](held, held.t); }
+      AL.pk = damp(AL.pk, AL.pkT, 4, dt); AR.pk = damp(AR.pk, AR.pkT, 4, dt);
       ovr.w = damp(ovr.w, ovr.cmd, 5, dt);
       if (st === "stand" && !busy) {
         if (held && held.id !== want) release();
