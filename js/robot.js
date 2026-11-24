@@ -9,8 +9,8 @@
      с реквизитом: таблица с формулами, документ с колонтитулами, окно сайта,
      терминал, сборка EXE, игра с ИИ; поверх — всплывающие надписи (HTML).
    Руки сглаживаются (без рывков), значки и реквизит прогреваются заранее (без подвисаний).
-   Значки и панели держит кистью как человек книгу: большой палец на лицевой стороне,
-   остальные пальцы сзади; отпустил — кисть остаётся на руке и раскрывается.
+   Значки и панели держит своей же кистью (форма кисти Spline, согнутая кодом): за нижние углы,
+   большой палец на лицевой стороне, пальцы сзади; отпустил — кисть остаётся на руке и раскрывается.
    PDF: замах, бросок, полёт вокруг робота (и за головой), ловля в подставленные руки.
    У коврика — ноутбук, планшет, папки, ящик с инструментами, кружка, значки на подставках.
    Слои: пол, кубики и мелочи (three.js) → робот (Spline) → копии кубиков с проверкой
@@ -713,9 +713,9 @@
       return { pos: pos, s: Math.max(.15, r.width * wpp / (ICON * K)) };
     }
     var _o = new V3();
-    function edgeW(g, side, out) {   // кромка нужной половинки — туда кладётся рука
+    function edgeW(g, side, out) {   // нижний угол нужной половинки — туда кладётся кисть (центр кисти чуть ниже и позади)
       var h = g.halves[side < 0 ? 0 : 1];
-      return h.localToWorld(out.set(side * (ICON / 2 + .02), -.03, 0));
+      return h.localToWorld(out.set(side * (ICON / 2 - .05), -ICON / 2 - .015, -.045));
     }
     function faceCam(g) { g.lookAt(tCam.position); }
 
@@ -1062,91 +1062,118 @@
       setCapsule(OCC.head, _o1, _o2, HEAD_TOP * .42);
     }
 
-    /* ---------- кисти-захваты ----------
-       Пока рука держит значок или панель, родная кисть Spline прячется, а вместо неё встаёт
-       кисть в том же чёрном глянце. Держит как человек книгу: большой палец лежит на лицевой
-       стороне, четыре пальца — сзади, ладонь у кромки, запястье продолжает линию предплечья.
-       Отпустил — кисть остаётся на руке и раскрывается, а не улетает вместе с предметом. */
-    var gripMat = new THREE.MeshPhysicalMaterial({ color: 0x060607, metalness: .2, roughness: .13, clearcoat: 1, clearcoatRoughness: .04 });
-    var jointMat = new THREE.MeshPhysicalMaterial({ color: 0x24262b, metalness: .9, roughness: .3 });
-    var padMat = new THREE.MeshPhysicalMaterial({ color: 0x141518, metalness: .05, roughness: .6 });
-    var capCache = {}, knuckleG = new THREE.SphereGeometry(1, 14, 10), ringG = new THREE.TorusGeometry(1.02, .16, 6, 20);
-    ringG.rotateY(PI / 2);
-    function capX(L, r) {
-      var key = L.toFixed(4) + "_" + r;
-      if (!capCache[key]) { var g = new THREE.CapsuleGeometry(r, Math.max(.001, L - 2 * r), 5, 12); g.rotateZ(-PI / 2); g.translate(L / 2, 0, 0); capCache[key] = g; }
-      return capCache[key];
-    }
+    /* ---------- кисти-захваты из родной кисти робота ----------
+       Берётся сама кисть Spline (та же форма, что у робота) и сгибается кодом, как держат планшет
+       за край: кисть идёт вдоль кромки, четыре пальца обхватывают предмет сзади, большой палец
+       лежит на лицевой стороне. Поза хвата — две морф-цели (тонкая панель и толстый значок),
+       пальцы сжимаются в момент касания и разжимаются, когда робот отпускает или бросает предмет.
+       Отпустил — кисть остаётся на руке, а не улетает вместе с предметом. */
+    var Q4 = THREE.Quaternion;
+    var gripMat = new THREE.MeshPhysicalMaterial({ color: 0x060607, metalness: .25, roughness: .18, clearcoat: 1, clearcoatRoughness: .05 });
     function blockGeo(w, h, d, r) {            // скруглённый брусок: w — по X, h — по Y, d — по Z
       var g = new THREE.ExtrudeGeometry(rrShape(w - 2 * r, h - 2 * r, Math.min(w, h) * .16), { depth: Math.max(.001, d - 2 * r), bevelEnabled: true, bevelThickness: r, bevelSize: r, bevelSegments: 3, curveSegments: 6 });
       g.center(); return g;
     }
-    // палец: цепочка фаланг вдоль +X, у каждой — шарнир (группа) с «костяшкой»
-    function mkFinger(lens, r) {
-      var root = new THREE.Group(), cur2 = root, segs = [];
-      lens.forEach(function (L, i) {
-        var j = new THREE.Group(); if (i) j.position.x = lens[i - 1]; cur2.add(j);
-        var kn = new THREE.Mesh(knuckleG, gripMat); kn.scale.setScalar(r * 1.05); j.add(kn);
-        var s = new THREE.Mesh(capX(L, r * (1 - i * .06)), gripMat); j.add(s);
-        var ring = new THREE.Mesh(ringG, jointMat); ring.scale.setScalar(r); ring.position.x = r * .55; j.add(ring);   // шарнирное кольцо
-        segs.push(j); cur2 = j;
-      });
-      return { root: root, segs: segs, lens: lens };
+    function sstep(a, b, x) { var k = (x - a) / (b - a); k = k < 0 ? 0 : k > 1 ? 1 : k; return k * k * (3 - 2 * k); }
+    // Сырые координаты кисти Spline: Y — от запястья к пальцам, −Z — сторона ладони, большой палец со стороны −X.
+    // Предмет в позе хвата: плоскость YZ, задняя грань x = xb (за указательным пальцем), лицевая xb − t, кромка z = ze.
+    function gripPose(P, N, t) {
+      var n = P.length / 3, i, x, y, ZE = -1.5, FC = .35, TF = .12;
+      var wT = new Float32Array(n), wF = new Float32Array(n);
+      for (i = 0; i < n; i++) {
+        x = P[3 * i]; y = P[3 * i + 1];
+        var a = sstep(-10.6, -12.8, x), b = sstep(-12.9, -13.9, x);
+        var th = (a + (b - a) * sstep(25, 27.5, y)) * sstep(7, 13, y) * (1 - sstep(35.5, 37.5, y));
+        wT[i] = th; wF[i] = (1 - th) * sstep(25.5, 28.5, y);
+      }
+      var Q = new Float32Array(P), M = new Float32Array(N), v = new V3(), nv = new V3(), I = new Q4(), qw = new Q4(), X = new V3(1, 0, 0);
+      function rot(idx, qq, pv, w) {            // поворот на долю w полного поворота qq вокруг точки pv (по углу)
+        if (w < 1e-4) return;
+        qw.copy(I).slerp(qq, w);
+        v.set(Q[3 * idx], Q[3 * idx + 1], Q[3 * idx + 2]).sub(pv).applyQuaternion(qw).add(pv);
+        Q[3 * idx] = v.x; Q[3 * idx + 1] = v.y; Q[3 * idx + 2] = v.z;
+        nv.set(M[3 * idx], M[3 * idx + 1], M[3 * idx + 2]).applyQuaternion(qw); M[3 * idx] = nv.x; M[3 * idx + 1] = nv.y; M[3 * idx + 2] = nv.z;
+      }
+      // пальцы сгибаются в трёх суставах — обхватывают предмет сзади
+      var pivM = new V3(0, 27, 4.5), pivP = new V3(0, 33.5, 3.8), pivD = new V3(0, 39, 0);
+      var qm = new Q4().setFromAxisAngle(X, -FC), qp = new Q4().setFromAxisAngle(X, -FC * 1.2), qd = new Q4().setFromAxisAngle(X, -FC * .8);
+      for (i = 0; i < n; i++) {
+        if (wF[i] < 1e-3) continue;
+        y = P[3 * i + 1];
+        rot(i, qd, pivD, wF[i] * sstep(37.5, 40.5, y)); rot(i, qp, pivP, wF[i] * sstep(32, 35, y)); rot(i, qm, pivM, wF[i]);
+      }
+      var xb = 1e9; for (i = 0; i < n; i++) if (wT[i] < .05 && Q[3 * i + 2] < ZE && Q[3 * i + 1] > 8) xb = Math.min(xb, Q[3 * i]);
+      xb -= .35;
+      // большой палец плавно отходит от пальцев на толщину предмета (сдвиг нарастает от основания)
+      // и чуть наклоняется вдоль лицевой стороны
+      var mx = -1e9; for (i = 0; i < n; i++) if (wT[i] > .9 && P[3 * i + 1] > 18 && Q[3 * i + 2] < ZE + 1) mx = Math.max(mx, Q[3 * i]);
+      var d = Math.max(0, mx - (xb - t - .25)), C2 = new V3(-15, 23, 0), r2 = new Q4().setFromAxisAngle(X, -TF);
+      for (i = 0; i < n; i++) {
+        if (wT[i] < 1e-3) continue;
+        y = P[3 * i + 1];
+        rot(i, r2, C2, wT[i] * sstep(20, 25, y));
+        Q[3 * i] -= d * wT[i] * sstep(8, 21, y);
+      }
+      return { P: Q, N: M, xb: xb, ze: ZE };
     }
-    // Система кисти: X — от запястья к пальцам (внутрь предмета), Z — нормаль лицевой стороны
-    // предмета (к камере), начало — на кромке предмета в плоскости его задней стороны.
-    var PALM = { x: -.047, z: -.021, w: .09, h: .088, d: .03 };
-    function mkGripHand(mirror) {
+    var GRIP = (function () {
+      var src = AL.hand && AL.hand.geometry;
+      if (!src || !src.attributes.position || !src.attributes.normal || !src.index) return null;
+      var pos = src.attributes.position, nor = src.attributes.normal, n = pos.count, P = new Float32Array(n * 3), N = new Float32Array(n * 3);
+      for (var i = 0; i < n; i++) { P[3 * i] = pos.getX(i); P[3 * i + 1] = pos.getY(i); P[3 * i + 2] = pos.getZ(i); N[3 * i] = nor.getX(i); N[3 * i + 1] = nor.getY(i); N[3 * i + 2] = nor.getZ(i); }
+      var thin = gripPose(P, N, 1), thick = gripPose(P, N, 7.7);
+      var g = new THREE.BufferGeometry();
+      g.setAttribute("position", new THREE.BufferAttribute(P, 3)); g.setAttribute("normal", new THREE.BufferAttribute(N, 3));
+      g.setIndex(new THREE.BufferAttribute(new src.index.array.constructor(src.index.array), 1));
+      g.morphAttributes.position = [new THREE.BufferAttribute(thin.P, 3), new THREE.BufferAttribute(thick.P, 3)];
+      g.morphAttributes.normal = [new THREE.BufferAttribute(thin.N, 3), new THREE.BufferAttribute(thick.N, 3)];
+      g.computeBoundingSphere();
+      return { geo: g, xb: thin.xb, ze: thin.ze, T0: 1, T1: 7.7 };
+    })();
+    var GY = 22, TAU = .22;                    // точка хвата по длине сырой кисти и наклон кисти пальцами вверх
+    function mkGripHand() {
       var Hg = new THREE.Group(); Hg.matrixAutoUpdate = false;
-      var palm = new THREE.Mesh(blockGeo(PALM.w, PALM.h, PALM.d, .011), gripMat); palm.position.set(PALM.x, 0, PALM.z); Hg.add(palm);
-      var pad = new THREE.Mesh(blockGeo(.062, .066, .006, .0025), padMat); pad.position.set(PALM.x - .006, -.004, PALM.z + PALM.d / 2 - .001); Hg.add(pad);
-      var back = new THREE.Mesh(blockGeo(.064, .07, .01, .004), gripMat); back.position.set(PALM.x + .004, 0, PALM.z - PALM.d / 2 - .002); Hg.add(back);
-      var bar = new THREE.Mesh(new THREE.CylinderGeometry(.0115, .0115, .086, 16), jointMat); bar.position.set(-.004, 0, -.013); Hg.add(bar);
-      var mound = new THREE.Mesh(knuckleG, gripMat); mound.scale.set(.03, .024, .018); mound.position.set(-.05, .034, -.01); Hg.add(mound);   // подушечка у большого пальца
-      var fingers = [-.031, -.0105, .0105, .031].map(function (y, i) {
-        var k = i === 0 ? .84 : i === 3 ? .9 : 1;
-        var f = mkFinger([.044 * k, .032 * k, .025 * k], .0102); f.root.position.set(-.002, y, -.012); Hg.add(f.root); return f;
-      });
-      var thumb = mkFinger([.046, .042, .034], .014); Hg.add(thumb.root);
-      var wrist = new THREE.Group(); Hg.add(wrist);
-      var wm = new THREE.Mesh(new THREE.CylinderGeometry(.027, .031, 1, 20), gripMat); wm.position.y = .5; wrist.add(wm);
-      var ring = new THREE.Mesh(new THREE.TorusGeometry(.03, .0055, 8, 24), jointMat); ring.rotation.x = PI / 2; ring.position.y = .004; wrist.add(ring);
+      var m = null;
+      if (GRIP) { m = new THREE.Mesh(GRIP.geo, gripMat); m.frustumCulled = false; Hg.add(m); }
       Hg.visible = false; tScene.add(Hg);
-      return { g: Hg, fingers: fingers, thumb: thumb, wrist: wrist, wm: wm, mir: mirror ? -1 : 1 };
+      return { g: Hg, m: m };
     }
-    AL.gh = mkGripHand(true); AR.gh = mkGripHand(false); AL.gw = AR.gw = 0;
-    [AL, AR].forEach(function (A) { A.hw = new M4(); A.rel = null; A.th = .03; A.tdir = new V3(.6, .8, 0); });
-    // o — объект (половинка значка или панель), s — какой край (−1 левый, +1 правый), hw — полуширина,
-    // ly — высота хвата, zf / zb — лицевая и задняя плоскости предмета (в его координатах)
-    function grip(A, o, s, hw, ly, zf, zb) { A.req = { o: o, s: s, hw: hw, ly: ly, zf: zf == null ? .001 : zf, zb: zb == null ? -.004 : zb }; }
-    function gripIcon(A, g, side) { grip(A, g.halves[side < 0 ? 0 : 1], side, ICON / 2, -.03, .001, -.029); }
-    var _gm = new M4(), _gb = new M4(), _gi = new M4(), _gx = new V3(), _gy = new V3(), _gz = new V3(), _gp = new V3(), _ge = new V3(), _gd = new V3(), _gs = new V3();
-    var _tq = new Q(), _tq2 = new Q(), _tv = new V3(), _tv2 = new V3(), _X1 = new V3(1, 0, 0), _gq = new Q();
-    // мировая матрица кисти по предмету: пальцы уходят за предмет внутрь и чуть вверх (~25°),
-    // ладонь — снаружи у кромки, ниже точки хвата; заодно направление большого пальца в системе кисти
-    var _gu = new V3(), _gt = new V3();
+    AL.gh = mkGripHand(); AR.gh = mkGripHand(); AL.gw = AR.gw = 0;
+    [AL, AR].forEach(function (A) {
+      A.hw = new M4(); A.rel = null; A.th = 7.7;
+      A.hs = A.hand ? new V3().setFromMatrixScale(A.hand.matrixWorld).x : K * .0039;     // единиц мира на единицу сырой кисти
+    });
+    // o — объект (половинка значка или панель), s — какой нижний угол (−1 левый, +1 правый), hw / hh — полуширина
+    // и полувысота, zf / zb — лицевая и задняя плоскости предмета (в его координатах)
+    function grip(A, o, s, hw, hh, zf, zb) { if (GRIP) A.req = { o: o, s: s, hw: hw, hh: hh, zf: zf == null ? .001 : zf, zb: zb == null ? -.004 : zb }; }
+    function gripIcon(A, g, side) { grip(A, g.halves[side < 0 ? 0 : 1], side, ICON / 2, ICON / 2, .001, -.029); }
+    var _gm = new M4(), _gi = new M4(), _gx = new V3(), _gu = new V3(), _gz = new V3(), _gp = new V3(), _gd = new V3(), _gt = new V3(), _gn = new V3(), _ge = new V3();
+    // мировая матрица кисти по предмету: хват за нижнюю кромку у угла, кисть идёт вдоль кромки внутрь
+    // (продолжает предплечье, пришедшее сбоку-снизу). Сырые −X → лицевая сторона предмета, Y → вдоль
+    // кромки внутрь и чуть вверх, Z → вниз от кромки. Для левого угла матрица зеркальная — это вторая рука.
     function handFromObj(A, out) {
-      var r = A.gObj, o = r.o;
+      var r = A.gObj, o = r.o, hs = A.hs;
       o.updateMatrixWorld(true); _gm.copy(o.matrixWorld);
       _gx.setFromMatrixColumn(_gm, 0).normalize(); _gu.setFromMatrixColumn(_gm, 1).normalize();
       _gz.setFromMatrixColumn(_gm, 2); var sz = _gz.length(); _gz.multiplyScalar(1 / sz);
-      _gp.set(r.s * r.hw, r.ly, r.zb).applyMatrix4(_gm).addScaledVector(_gx, -r.s * .02 * K);
-      A.th = Math.max(.004, (r.zf - r.zb) * sz / K);
-      _gd.copy(_gx).multiplyScalar(-r.s).addScaledVector(_gu, .45).normalize();
-      _gy.crossVectors(_gz, _gd).normalize(); _gd.crossVectors(_gy, _gz);
-      _gt.copy(_gx).multiplyScalar(-r.s * .62).addScaledVector(_gu, .78);          // большой палец: вверх-внутрь по лицевой стороне
-      A.tdir.set(_gt.dot(_gd), _gt.dot(_gy) * A.gh.mir, 0).normalize();
-      _gb.makeBasis(_gd, _gy, _gz); _gq.setFromRotationMatrix(_gb);
-      return out.compose(_gp, _gq, _gs.set(K, K * A.gh.mir, K));
+      A.th = clamp((r.zf - r.zb) * sz / hs, GRIP.T0, GRIP.T1);
+      _gp.set(r.s * r.hw, -r.hh, r.zb).applyMatrix4(_gm).addScaledVector(_gx, -r.s * GY * hs * .9);   // нижняя кромка у угла, задняя плоскость
+      _gd.copy(_gx).multiplyScalar(-r.s * Math.cos(TAU)).addScaledVector(_gu, Math.sin(TAU));       // вдоль кромки внутрь
+      _gt.crossVectors(_gd, _gz).normalize(); if (_gt.dot(_gu) > 0) _gt.negate();            // вниз от кромки
+      _gn.copy(_gz).negate();
+      _ge.copy(_gp).addScaledVector(_gn, -GRIP.xb * hs).addScaledVector(_gd, -GY * hs).addScaledVector(_gt, -GRIP.ze * hs);
+      out.makeBasis(_gn.multiplyScalar(hs), _gd.multiplyScalar(hs), _gt.multiplyScalar(hs)); out.setPosition(_ge);
+      return out;
     }
     function updGrip(A, dt) {
       var r = A.req, G = A.gh;
+      if (!GRIP) { if (A.hand) A.hand.visible = true; return; }
       if (r && (!A.gObj || A.gw < .5 || (r.o === A.gObj.o && r.s === A.gObj.s))) A.gObj = r;
       var on = !!r && A.gObj === r;
       var o = A.gObj && A.gObj.o;
       var objOk = !!o && o.visible !== false && !(o.parent && o.parent.visible === false);
       if (on && !objOk) on = false;
-      A.gw = damp(A.gw, on ? 1 : 0, on ? 10 : 7, dt);
+      A.gw = damp(A.gw, on ? 1 : 0, on ? 11 : 7, dt);
       if (!on && !objOk && A.gw > .5) A.gw = .49;          // предмет исчез — кисть сразу обычная
       var vis = A.gw > .5 && (on || !!A.rel);
       G.g.visible = vis;
@@ -1158,34 +1185,9 @@
         A.rel = (A.rel || new M4()).copy(_gi).invert().multiply(A.hw);
       } else A.hw.multiplyMatrices(_gi, A.rel);           // отпустил — кисть едет вместе с рукой
       G.g.matrix.copy(A.hw); G.g.matrixWorldNeedsUpdate = true;
-      var c = sm((A.gw - .5) / .5), th = A.th;
-      // пальцы сзади: при хвате прижаты, при отпускании расходятся
-      G.fingers.forEach(function (f, i) {
-        f.segs.forEach(function (j, n) { j.rotation.y = lerp(.16 + n * .04, .015 + n * .02, c); });
-        f.root.rotation.z = (i - 1.5) * .05 * (1 - c);
-      });
-      // большой палец: от основания ладони огибает кромку и ложится на лицевую сторону
-      var th0 = G.thumb, L0 = th0.lens[0];
-      _tv.set(-.03, .04, -.008);                                                                   // основание
-      _tv2.set(lerp(-.024, -.006, c), lerp(.068, .05, c), lerp(.006, th + .0145, c));               // конец пясти
-      th0.root.position.copy(_tv);
-      _gd.subVectors(_tv2, _tv); var mL = _gd.length(); _gd.multiplyScalar(1 / mL);
-      th0.root.quaternion.setFromUnitVectors(_X1, _gd);
-      th0.segs[0].children[1].scale.x = mL / L0; th0.segs[1].position.x = mL;
-      _gy.set(lerp(.45, A.tdir.x, c), lerp(.62, A.tdir.y, c), lerp(.62, 0, c)).normalize();          // фаланга 1: по лицевой стороне вверх-внутрь
-      _tq.copy(th0.root.quaternion).invert(); _gs.copy(_gy).applyQuaternion(_tq);
-      th0.segs[1].quaternion.setFromUnitVectors(_X1, _gs);
-      _gs.copy(_gy); _gs.z -= lerp(0, .3, c); _gs.normalize();                                      // фаланга 2 — прижата к лицевой стороне
-      _tq2.copy(th0.root.quaternion).multiply(th0.segs[1].quaternion).invert(); _gs.applyQuaternion(_tq2);
-      th0.segs[2].quaternion.setFromUnitVectors(_X1, _gs);
-      // запястье тянется к настоящему запястью робота (там, где у Spline начинается кисть)
-      if (A.hand) {
-        wpos(A.hand, _ge); G.g.updateMatrixWorld(true); _gi.copy(G.g.matrixWorld).invert(); _ge.applyMatrix4(_gi);
-        _gp.set(PALM.x - PALM.w / 2 + .012, 0, PALM.z);
-        _gd.subVectors(_ge, _gp); if (_gd.x > -.006) { _gd.x = -.03; } var wl = clamp(_gd.length(), .012, .13);
-        G.wrist.position.copy(_gp); G.wrist.quaternion.setFromUnitVectors(_UP, _gd.normalize());
-        G.wm.scale.y = wl; G.wm.position.y = wl / 2;
-      }
+      // пальцы: 0 — раскрыты (как обычная кисть), 1 — хват; толщина предмета выбирает морф-цель
+      var c = sm((A.gw - .5) / .5), k = clamp((A.th - GRIP.T0) / (GRIP.T1 - GRIP.T0), 0, 1);
+      G.m.morphTargetInfluences[0] = c * (1 - k); G.m.morphTargetInfluences[1] = c * k;
       G.g.updateMatrixWorld(true);
     }
 
@@ -1319,7 +1321,8 @@
         var g = new THREE.Group(), tilt = new THREE.Group(); tilt.rotation.x = -.2; g.add(tilt);
         var bd = new THREE.Mesh(blockGeo(.24, .24, .03, .01), std(new THREE.Color(ICONS[a[0]].c2), { m: .2, r: .3, cc: 1 })); bd.position.set(0, .125, 0); tilt.add(bd);
         var f = new THREE.Mesh(new THREE.PlaneGeometry(.232, .232), new THREE.MeshBasicMaterial({ map: t, toneMapped: false, transparent: true })); f.position.set(0, .125, .0156); tilt.add(f);
-        var st2 = new THREE.Mesh(blockGeo(.16, .028, .1, .008), dark); st2.position.set(0, .014, -.03); g.add(st2);
+        var st2 = new THREE.Mesh(blockGeo(.21, .01, .09, .004), steel); st2.position.set(0, .005, -.012); g.add(st2);          // тонкая металлическая подставка
+        var lip = new THREE.Mesh(blockGeo(.21, .028, .008, .003), steel); lip.position.set(0, .016, .038); lip.rotation.x = -.2; g.add(lip);
         put(g, a[1], a[2], a[3], [.32, .2]);
       });
       play.add(stuff); playTop.add(stuff.clone());
@@ -1403,7 +1406,7 @@
       edgeW(h.g, 1, _q0); panelPoint(P, lx, ly, _p3);
       var k = seg(t, t0, t1);
       AL.w = 1; AL.target.copy(_q0).lerp(_p3, k);
-      if (lx >= 1 && k > .85) grip(AL, P.g, 1, P.w / 2, ly * P.h / 2, .001, -.003);      // держит панель за правый край
+      if (ly <= -1 && k > .85) grip(AL, P.g, 1, P.w / 2, P.h / 2, .001, -.003);      // держит панель за правый нижний угол
       else if (k < .15) gripIcon(AL, h.g, 1);
     }
     var XL_IDLE = ["=ВПР(A2;Цены!A:B;2;0)", "=СУММЕСЛИ(A:A;\"Лампа\";D:D)", "=СЧЁТЕСЛИ(B2:B6;\">5\")", "=ЕСЛИ(D7>10000;\"ок\";\"мало\")", "=ОКРУГЛ(D7*1,2;0)", "=ИНДЕКС(A2:A6;ПОИСКПОЗ(МАКС(D2:D6);D2:D6;0))"];
@@ -1530,7 +1533,7 @@
       excel: function (h, t) {
         iconRight(h, t);
         var P = props.sheet; P.on = t > .3; placePanel(P, .13, 1.08 + Math.sin(t * 1.5) * .008, .52, -.05);
-        leftTo(h, t, P, 1.07, -.35, .25, .8);
+        leftTo(h, t, P, .8, -1.06, .25, .8);
         var f1 = "=СУММ(D2:D6)", f2 = "=СУММ(ЗНАЧЕН(D2:D6))", f = "", r = 0, sel = [4, 7];
         if (t < .9) sel = [4, 2 + Math.floor(t * 5) % 5];
         else if (t < 1.6) f = typed(f1, t, .9, 1.55);
@@ -1560,7 +1563,7 @@
       word: function (h, t) {
         iconRight(h, t);
         var P = props.doc; P.on = t > .3; placePanel(P, .16, 1.14 + Math.sin(t * 1.4) * .008, .52, -.05);
-        leftTo(h, t, P, 1.07, -.3, .25, .8);
+        leftTo(h, t, P, .8, -1.06, .25, .8);
         var title = "Договор на разработку", hd = t > 1.9 ? 1 : 0, ok = t > 3.35 ? 1 : 0;
         var broke = t > 2.4 && t < 3.35, hx = broke ? Math.sin(t * 9) * 26 + 18 : 0, hr = broke ? Math.sin(t * 7) * .06 : 0;
         var n = t < 1.5 ? 0 : Math.min(6, 1 + Math.floor((t - 1.5) / .12)), np = n < 6 ? clamp(((t - 1.5) % .12) / .12, .2, 1) : 1;
