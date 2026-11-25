@@ -10,7 +10,8 @@
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   $$("[data-site]").forEach(function (el) { var k = el.getAttribute("data-site"); if (S[k]) el.textContent = S[k]; });
-  if (S.name) document.title = "Сервисный центр — " + S.name;
+  // заголовок вкладки: какая это страница — по классу body (service.html или pc.html)
+  if (S.name) document.title = (document.body.classList.contains("pcp") ? "Собери ПК онлайн в 3D — " : "Сервисный центр — ") + S.name;
   var y = $("#year"); if (y) y.textContent = new Date().getFullYear();
   // с этой страницы на главную — без повторной заставки
   try { sessionStorage.setItem("booted", "1"); } catch (e) {}

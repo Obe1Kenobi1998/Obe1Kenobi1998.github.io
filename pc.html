@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Собери ПК онлайн в 3D — НЕМЕЦ</title>
+  <meta name="description" content="Конструктор компьютера в 3D: выбирай корпус и комплектующие, смотри сборку со всех сторон, проверяй совместимость, цену и FPS в 1000+ играх. Ссылки на Яндекс Маркет, Ozon и DNS.">
+  <meta name="theme-color" content="#0c0e11">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/sections.css">
+  <link rel="stylesheet" href="css/pc.css">
+</head>
+<body class="pcp">
+
+<div class="bg" aria-hidden="true">
+  <canvas id="net"></canvas>
+  <div class="bg__aurora a1"></div>
+  <div class="bg__aurora a2"></div>
+  <div class="bg__grid"></div>
+  <div class="bg__noise"></div>
+</div>
+<div class="cursor-glow" id="cursorGlow" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+<!-- ============ ШАПКА ============ -->
+<header class="nav" id="nav">
+  <a href="index.html" class="brand" aria-label="На главную">
+    <span class="brand__mark"><span>&gt;_</span></span>
+    <span class="brand__text"><b data-site="name">НЕМЕЦ</b><small>сборка ПК онлайн</small></span>
+  </a>
+  <nav class="nav__links" id="navLinks">
+    <a href="index.html" class="nav__home"><span aria-hidden="true">←</span> Главная</a>
+    <a href="#build">Собрать</a>
+    <a href="#presets">Готовые сборки</a>
+    <a href="#how">Как считаем</a>
+    <a href="service.html" class="nav__ext">Сервис <span aria-hidden="true">↗</span></a>
+  </nav>
+  <a href="#build" class="btn btn--gold btn--sm">Собрать ПК</a>
+  <button class="nav__burger" id="burger" aria-label="Меню" type="button"><span></span><span></span></button>
+</header>
+
+<main class="pcp__main" id="top">
+
+<!-- ============ ГЕРОЙ ============ -->
+<section class="pch">
+  <div class="pch__text">
+    <div class="pch__top reveal">
+      <span class="pch__badge"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2"/><circle cx="12" cy="15" r="3"/><path d="M9 6h6"/></svg>Сборка ПК онлайн · 3D</span>
+      <a href="index.html" class="pch__crumb"><span aria-hidden="true">←</span> Главная <i>/</i> <b>Сборка ПК</b></a>
+    </div>
+    <h1 class="reveal">Собери компьютер в&nbsp;3D <span>и узнай цену и&nbsp;FPS в&nbsp;играх</span></h1>
+    <p class="pch__sub reveal">Ставь корпус и комплектующие прямо в виртуальную студию: крути, приближай, открывай стекло и фронт. Несовместимое не встанет — сразу скажу почему: сокет, размеры, мощность. Собрал — включай: на большом мониторе покажу, как пойдут больше тысячи игр.</p>
+    <div class="pch__cta reveal">
+      <a href="#build" class="btn btn--gold btn--lg">Начать сборку <span class="arr">↓</span></a>
+      <a href="#presets" class="btn btn--ghost btn--lg">Готовые сборки</a>
+    </div>
+    <div class="pch__stats reveal">
+      <div><b data-pc="items">215</b><span>комплектующих в каталоге</span></div>
+      <div><b data-pc="cases">49</b><span>корпусов в 3D</span></div>
+      <div><b data-pc="games">1000</b><span>игр с оценкой FPS</span></div>
+      <div><b data-pc="date">25.11.2026</b><span>дата цен</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ КОНСТРУКТОР ============ -->
+<section class="pcb" id="build" aria-label="Конструктор компьютера">
+  <div class="pcb__app" id="pcApp">
+
+    <aside class="pcb__side" aria-label="Твоя сборка">
+      <div class="pcb__sideHead"><b>Твоя сборка</b><span id="pcCount">0 из 8</span></div>
+      <div class="pcs" id="pcSteps"></div>
+      <div class="pcb__sum">
+        <div class="pcb__total"><span>Итого примерно</span><b id="pcTotal">0 ₽</b></div>
+        <div class="pcb__pw"><span>Питание</span><b id="pcPower">—</b><i><em id="pcPowerBar"></em></i></div>
+        <ul class="pcb__probs" id="pcProblems" hidden></ul>
+        <button type="button" class="btn btn--gold btn--block pcb__on" id="pcPower1" disabled>Включить ПК</button>
+        <button type="button" class="btn btn--ghost btn--block btn--sm" id="pcOrder">Заказать эту сборку у мастера</button>
+        <div class="pcb__row">
+          <button type="button" class="pcb__mini" id="pcPrintBtn"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V3h10v6M7 17H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2M7 14h10v7H7z"/></svg>Печать</button>
+          <button type="button" class="pcb__mini" id="pcSave"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h11l3 3v15H5zM8 3v6h8V3M8 21v-7h8v7"/></svg>В сравнение</button>
+        </div>
+        <div class="pcb__row">
+          <button type="button" class="pcb__mini" id="pcShare"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg>Ссылка на сборку</button>
+          <button type="button" class="pcb__mini" id="pcReset"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5"/></svg>Разобрать</button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="pcb__stage" id="pcStage">
+      <div class="pcb__host" id="pcCanvasHost"></div>
+      <div class="pcb__loader" aria-hidden="true"><i></i>Загружаю 3D-студию…</div>
+      <div class="pcb__empty"><b>Студия пуста</b><span>Выбери корпус в каталоге справа — он появится на подиуме, дальше ставь в него детали</span></div>
+      <div class="pcb__fail">3D-студия не запустилась на этом устройстве — собирать всё равно можно: совместимость, цены и FPS работают.</div>
+      <div class="pcb__tools" id="pcTools" role="toolbar" aria-label="Управление 3D">
+        <div class="pct-g">
+          <button type="button" data-view="home" title="Общий вид">Обзор</button>
+          <button type="button" data-view="front" title="Спереди">Спереди</button>
+          <button type="button" data-view="side" title="Сбоку, со стороны стекла">Сбоку</button>
+          <button type="button" data-view="inside" title="Заглянуть внутрь">Внутрь</button>
+          <button type="button" data-view="back" title="Сзади">Сзади</button>
+        </div>
+        <div class="pct-g">
+          <button type="button" data-panel="glass" hidden>Стекло</button>
+          <button type="button" data-panel="front" hidden>Фронт</button>
+          <button type="button" data-panel="top" hidden>Крыша</button>
+          <button type="button" data-panel="right" hidden>Правая</button>
+        </div>
+        <div class="pct-g">
+          <button type="button" data-spin title="Крутить подиум"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></svg></button>
+          <button type="button" data-zoom=".8" title="Приблизить" aria-label="Приблизить">+</button>
+          <button type="button" data-zoom="1.25" title="Отдалить" aria-label="Отдалить">−</button>
+        </div>
+      </div>
+      <p class="pcb__hint">Тяни — вращать · колесо или щипок — приблизить · клик по панели корпуса — открыть</p>
+
+      <!-- монитор с играми: появляется после включения, встаёт ровно в экран 3D-монитора -->
+      <div class="pcm" id="pcMonitor" hidden>
+        <div class="pcm__head">
+          <div class="pcm__tabs" role="tablist" aria-label="Монитор">
+            <button type="button" class="on" data-tab="games" role="tab" aria-selected="true">Игры</button>
+            <button type="button" data-tab="sum" role="tab" aria-selected="false">Сводка</button>
+            <button type="button" data-tab="cmp" role="tab" aria-selected="false">Сравнение сборок</button>
+          </div>
+          <small class="pcm__sys" id="pcGSys"></small>
+          <button type="button" class="pcm__off" id="pcMonOff">⏻ Выключить</button>
+        </div>
+        <div class="pcm__pane is-on" data-pane="games">
+          <div class="pcm__ctl">
+            <div class="pcm__seg" id="pcGRes" role="group" aria-label="Разрешение"><button type="button" class="on" data-res="1" aria-pressed="true">1080p</button><button type="button" data-res="2" aria-pressed="false">1440p</button><button type="button" data-res="3" aria-pressed="false">4K</button></div>
+            <div class="pcm__seg" id="pcGQ" role="group" aria-label="Качество графики"><button type="button" data-q="1" aria-pressed="false">Средние</button><button type="button" class="on" data-q="2" aria-pressed="true">Высокие</button><button type="button" data-q="3" aria-pressed="false">Ультра</button></div>
+            <select id="pcGCls" aria-label="Тип игр"><option value="">Все игры</option><option value="e">Онлайн и киберспорт</option><option value="x">Очень тяжёлые AAA</option><option value="h">Тяжёлые AAA</option><option value="m">Средние</option><option value="l">Лёгкие и инди</option></select>
+            <select id="pcGSort" aria-label="Сортировка игр"><option value="pop">Сначала популярные</option><option value="fd">FPS: больше</option><option value="fa">FPS: меньше</option><option value="new">Сначала новые</option><option value="az">По названию</option></select>
+            <input id="pcGSearch" type="search" placeholder="Найти игру…" aria-label="Найти игру" autocomplete="off">
+          </div>
+          <div class="pcm__sum" id="pcGSum"></div>
+          <ul class="pcm__list" id="pcGames"></ul>
+          <p class="pcm__note">Оценка по модели производительности: без DLSS/FSR и генерации кадров. Реальный FPS зависит от сцены, драйверов и версии игры.</p>
+          <div class="pcgd" id="pcGame" hidden></div>
+        </div>
+        <div class="pcm__pane" data-pane="sum"><div class="pcm__scroll" id="pcSumBody"></div></div>
+        <div class="pcm__pane" data-pane="cmp"><div class="pcm__scroll" id="pcCmpBody"></div></div>
+      </div>
+    </div>
+
+    <aside class="pcb__cat" id="pcCat" aria-label="Каталог комплектующих">
+      <div class="pcc__head" id="pcCatHead"></div>
+      <div class="pcc__ctl">
+        <label class="pcc__search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><input id="pcSearch" type="search" placeholder="Поиск модели…" aria-label="Поиск модели" autocomplete="off"></label>
+        <select id="pcSort" aria-label="Сортировка"><option value="fit">Сначала подходящие</option><option value="pa">Дешевле</option><option value="pd">Дороже</option><option value="perf">Мощнее</option><option value="az">По названию</option></select>
+      </div>
+      <div class="pcc__chips" id="pcChips"></div>
+      <label class="pcc__fit"><input type="checkbox" id="pcFit"> Только подходящие к сборке</label>
+      <div class="pcc__info" id="pcCatInfo"></div>
+      <div class="pcc__list" id="pcList"></div>
+    </aside>
+  </div>
+</section>
+
+<!-- ============ ГОТОВЫЕ СБОРКИ ============ -->
+<section class="pcx" id="presets">
+  <div class="pcx__head reveal">
+    <span class="kicker">готовые сборки</span>
+    <h2>Не хочешь выбирать с нуля?</h2>
+    <p>Поставлю готовую сборку на стенд — дальше меняй любую деталь, совместимость проверится сама.</p>
+  </div>
+  <div class="pcx__pre reveal" id="pcPresets"></div>
+</section>
+
+<!-- ============ КАК СЧИТАЕМ ============ -->
+<section class="pcx" id="how">
+  <div class="pcx__head reveal">
+    <span class="kicker">как считаем</span>
+    <h2>Честно о ценах, ссылках и FPS</h2>
+  </div>
+  <div class="pcx__grid">
+    <div class="pcx__card reveal"><b>₽</b><h3>Цены — на дату</h3><p>Ориентировочные розничные цены на <span data-pc="date">25.11.2026</span> по данным магазинов и обзоров. В 2026 видеокарты и память сильно дорожают, поэтому точную цену смотри по ссылке у каждой позиции.</p></div>
+    <div class="pcx__card reveal"><b>↗</b><h3>Ссылки — настоящие</h3><p>Кнопки «Маркет», «Ozon», «DNS» открывают поиск именно этой модели в магазине: видно живые цены и наличие прямо сейчас.</p></div>
+    <div class="pcx__card reveal"><b>✓</b><h3>Совместимость</h3><p>Проверяю сокет, тип и число планок памяти, формат платы и корпуса, длину видеокарты, высоту кулера, место под радиатор, формат и мощность блока питания с запасом.</p></div>
+    <div class="pcx__card reveal"><b>FPS</b><h3>FPS — оценка</h3><p>Считаю по силе видеокарты и процессора, видеопамяти, разрешению и настройкам — без DLSS/FSR. Это ориентир, а не замер: в разных сценах цифры будут гулять.</p></div>
+  </div>
+  <p class="pcx__legal">3D-модели собраны по реальным габаритам и особенностям моделей (форм-фактор, стекло, сетка, вентиляторы, длина, высота), но это не фотокопии. Габариты — по данным производителей, перед покупкой сверяйте на странице товара. Названия и товарные знаки принадлежат их владельцам.</p>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer__big" aria-hidden="true">BUILD&nbsp;YOUR&nbsp;PC</div>
+  <div class="footer__row">
+    <span>© <span id="year">2026</span> <span data-site="name">НЕМЕЦ</span> · <span data-site="city">Россия</span></span>
+    <a href="index.html" class="to-top">← На главную</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="pc-print" id="pcPrint" aria-hidden="true"></div>
+
+<script src="js/config.js"></script>
+<script src="js/background.js"></script>
+<script src="js/service-page.js"></script>
+<script src="js/pc-data.js"></script>
+<script src="js/pc-games.js"></script>
+<script src="js/pc-3d.js"></script>
+<script src="js/pc-builder.js"></script>
+</body>
+</html>
