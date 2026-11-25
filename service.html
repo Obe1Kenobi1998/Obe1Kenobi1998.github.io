@@ -74,9 +74,164 @@
     <div class="orb">
       <div class="orb__glow" aria-hidden="true"></div>
       <div class="orb__disc" id="svcBot" aria-hidden="true">
-        <img class="orb__img" src="assets/svc/android.webp" alt="" width="1000" height="1000" decoding="async">
+        <svg class="svb" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+          <defs>
+            <radialGradient id="svbBg" cx="46%" cy="40%" r="64%"><stop offset="0" stop-color="#1a4a3b"/><stop offset=".55" stop-color="#0b231a"/><stop offset="1" stop-color="#040d09"/></radialGradient>
+            <radialGradient id="svbHalo" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#6ff5bd" stop-opacity=".5"/><stop offset=".5" stop-color="#6ff5bd" stop-opacity=".14"/><stop offset="1" stop-color="#6ff5bd" stop-opacity="0"/></radialGradient>
+            <pattern id="svbGrid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#7ff0c0" stroke-opacity=".07"/></pattern>
+            <linearGradient id="svbSkin" x1="205" y1="0" x2="308" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#aebfb9"/><stop offset=".3" stop-color="#dbe6e2"/><stop offset=".75" stop-color="#f4f8f6"/><stop offset="1" stop-color="#ffffff"/></linearGradient>
+            <linearGradient id="svbNeckG" x1="0" y1="262" x2="0" y2="400" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#7f948c"/><stop offset=".3" stop-color="#cfdcd7"/><stop offset="1" stop-color="#e9f0ed"/></linearGradient>
+            <radialGradient id="svbCheek" cx="264" cy="192" r="40" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+            <linearGradient id="svbCav" x1="110" y1="60" x2="230" y2="270" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#0e3326"/><stop offset="1" stop-color="#030a07"/></linearGradient>
+            <linearGradient id="svbMetal" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#1e2925"/><stop offset=".45" stop-color="#8a9a94"/><stop offset=".6" stop-color="#5e6d67"/><stop offset="1" stop-color="#18211e"/></linearGradient>
+            <linearGradient id="svbLip" x1="283" y1="0" x2="300" y2="0" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#a98583"/><stop offset="1" stop-color="#dcb6b1"/></linearGradient>
+            <filter id="svbGlow" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="2.4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+            <filter id="svbBlur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="5"/></filter>
+            <clipPath id="svbClip"><path id="svbSil" d="M176 410C178 372 181 336 184 300C170 290 146 272 128 248C108 220 104 178 110 146C118 102 148 66 194 54C236 44 270 70 282 108C287 124 290 138 289 147C288 153 285 158 284 163C290 176 300 186 306 194C308 198 305 203 300 204C296 205 292 206 291 209C292 213 294 216 296 218C300 221 300 225 296 227L291 229C296 232 298 236 295 240C292 244 288 246 287 249C288 256 292 262 292 268C292 276 286 281 278 283C266 286 254 289 246 293C248 320 252 362 258 410Z"/></clipPath>
+          </defs>
+          <rect width="400" height="400" fill="url(#svbBg)"/>
+          <rect width="400" height="400" fill="url(#svbGrid)"/>
+          <circle class="svb__halo" cx="168" cy="136" r="140" fill="url(#svbHalo)"/>
+
+          <g class="svb__head">
+            <!-- кабели-«волосы» -->
+            <g class="svb__hair" fill="none" stroke-linecap="round">
+              <path d="M124 132C92 170 70 250 78 420" stroke="#121a17" stroke-width="10"/>
+              <path d="M116 162C90 200 84 280 96 420" stroke="#16201c" stroke-width="9"/>
+              <path d="M118 192C98 226 98 300 112 420" stroke="#121a17" stroke-width="8"/>
+              <path d="M128 218C112 250 116 320 128 420" stroke="#16201c" stroke-width="7"/>
+              <path d="M142 238C130 270 136 340 146 420" stroke="#121a17" stroke-width="6"/>
+              <g stroke="#6d827a" stroke-width="1.6" opacity=".55">
+                <path d="M122 136C91 173 70 250 77 420"/><path d="M114 166C89 202 83 280 95 420"/><path d="M116 195C97 228 97 300 111 420"/><path d="M126 221C111 252 115 320 127 420"/><path d="M140 241C129 272 135 340 145 420"/>
+              </g>
+              <path class="svb__pl svb__pl--hair" pathLength="100" d="M116 162C90 200 84 280 96 420" stroke="#8ff7cf" stroke-width="2" filter="url(#svbGlow)" style="--d:-.8s"/>
+              <path class="svb__pl svb__pl--hair" pathLength="100" d="M128 218C112 250 116 320 128 420" stroke="#8ff7cf" stroke-width="1.8" filter="url(#svbGlow)" style="--d:-2s"/>
+              <rect x="76" y="262" width="62" height="13" rx="6.5" fill="url(#svbMetal)" transform="rotate(-6 107 268)"/>
+              <circle class="svb__led" cx="130" cy="265" r="1.8" fill="#7ff5c6" style="--d:-.3s"/>
+            </g>
+
+            <!-- основа силуэта: полость -->
+            <use href="#svbSil" fill="url(#svbCav)"/>
+
+            <g clip-path="url(#svbClip)">
+              <!-- мозг-микросхема -->
+              <circle cx="166" cy="132" r="62" fill="#5ff0b0" opacity=".17" filter="url(#svbBlur)"/>
+              <g class="svb__cortex" fill="none" stroke="#5ff0b0" stroke-width="1.6" stroke-linecap="round" filter="url(#svbGlow)">
+                <path d="M210 150C220 120 214 86 186 74C168 64 140 70 128 90C114 108 112 140 122 160C128 172 140 176 150 174C160 186 182 192 196 182C206 176 206 162 210 150Z" stroke-width="2"/>
+                <path d="M150 82C160 96 146 106 158 118" opacity=".7"/>
+                <path d="M180 78C188 92 178 102 190 112C200 122 192 132 202 140" opacity=".7"/>
+                <path d="M130 112C142 116 136 128 148 132" opacity=".7"/>
+                <path d="M200 162C186 154 172 158 156 152C146 148 138 154 130 150" opacity=".8"/>
+                <path d="M136 168C146 162 152 168 162 166" opacity=".6"/>
+                <path d="M196 96C204 104 200 114 208 122" opacity=".6"/>
+                <ellipse cx="140" cy="188" rx="19" ry="12" stroke-width="1.6"/>
+                <path d="M124 186C134 182 146 182 158 186M126 192C136 190 146 190 156 193" opacity=".6"/>
+              </g>
+              <g fill="none" stroke="#7ff5c6" stroke-width="1.3" stroke-linejoin="round" opacity=".85">
+                <path d="M177 124H192L198 118H206"/><path d="M177 132H188L196 140V156"/>
+                <path d="M155 124H142L136 118V100"/><path d="M155 132H144L138 138H126"/>
+                <path d="M162 117V104L168 98V84"/><path d="M170 117V108L178 100H190"/>
+                <path d="M162 139V152L156 158V170"/><path d="M170 139V150L176 156H186"/>
+              </g>
+              <g fill="#bdfbe1">
+                <circle cx="206" cy="118" r="2"/><circle cx="196" cy="156" r="2"/><circle cx="136" cy="100" r="2"/><circle cx="126" cy="138" r="2"/>
+                <circle cx="168" cy="84" r="2"/><circle cx="190" cy="100" r="2"/><circle cx="156" cy="170" r="2"/><circle cx="186" cy="156" r="2"/>
+              </g>
+              <g fill="none" stroke="#eafff5" stroke-width="2.2" stroke-linecap="round" filter="url(#svbGlow)">
+                <path class="svb__pl" pathLength="100" d="M177 124H192L198 118H206" style="--d:-.2s"/>
+                <path class="svb__pl" pathLength="100" d="M155 132H144L138 138H126" style="--d:-1.1s"/>
+                <path class="svb__pl" pathLength="100" d="M162 117V104L168 98V84" style="--d:-1.9s"/>
+                <path class="svb__pl" pathLength="100" d="M170 139V150L176 156H186" style="--d:-.6s"/>
+                <path class="svb__pl" pathLength="100" d="M155 124H142L136 118V100" style="--d:-2.4s"/>
+                <path class="svb__pl" pathLength="100" d="M177 132H188L196 140V156" style="--d:-1.5s"/>
+                <path class="svb__pl" pathLength="100" d="M210 150C220 120 214 86 186 74C168 64 140 70 128 90C114 108 112 140 122 160C128 172 140 176 150 174C160 186 182 192 196 182C206 176 206 162 210 150Z" style="--d:-.4s;--t:7s"/>
+              </g>
+              <!-- ядро -->
+              <g class="svb__core">
+                <rect x="153" y="116" width="26" height="26" rx="4" fill="#0b2a1f" stroke="#8ff7cf" stroke-width="1.6" filter="url(#svbGlow)"/>
+                <rect x="160" y="123" width="12" height="12" rx="2" fill="#8ff7cf" filter="url(#svbGlow)"/>
+                <path d="M158 116v-4M163 116v-4M169 116v-4M174 116v-4M158 142v4M163 142v4M169 142v4M174 142v4M153 121h-4M153 126h-4M153 132h-4M153 137h-4M179 121h4M179 126h4M179 132h4M179 137h4" stroke="#8ff7cf" stroke-width="1.4"/>
+              </g>
+              <!-- механика шеи -->
+              <g fill="none" stroke-linecap="round">
+                <path d="M150 196C160 240 192 262 198 420" stroke="#101814" stroke-width="8"/>
+                <path d="M172 196C178 236 204 272 212 420" stroke="#101814" stroke-width="7"/>
+                <path d="M150 196C160 240 192 262 198 420M172 196C178 236 204 272 212 420" stroke="#5a6d66" stroke-width="1.5" opacity=".6"/>
+                <path class="svb__pl" pathLength="100" d="M172 196C178 236 204 272 212 420" stroke="#8ff7cf" stroke-width="1.8" filter="url(#svbGlow)" style="--d:-1.3s"/>
+              </g>
+              <g fill="url(#svbMetal)">
+                <rect x="186" y="262" width="36" height="12" rx="5"/><rect x="185" y="280" width="37" height="12" rx="5"/><rect x="184" y="298" width="38" height="12" rx="5"/>
+                <rect x="183" y="316" width="39" height="12" rx="5"/><rect x="182" y="334" width="40" height="12" rx="5"/><rect x="181" y="352" width="41" height="12" rx="5"/>
+                <rect x="180" y="370" width="42" height="12" rx="5"/><rect x="179" y="388" width="43" height="12" rx="5"/>
+              </g>
+              <g fill="#7ff5c6">
+                <circle class="svb__led" cx="216" cy="268" r="1.6" style="--d:-.2s"/><circle class="svb__led" cx="216" cy="304" r="1.6" style="--d:-.9s"/>
+                <circle class="svb__led" cx="216" cy="340" r="1.6" style="--d:-.5s"/><circle class="svb__led" cx="216" cy="376" r="1.6" style="--d:-1.2s"/>
+              </g>
+              <path d="M204 204L224 258" stroke="url(#svbMetal)" stroke-width="6" stroke-linecap="round"/>
+
+              <!-- шея (фарфор) -->
+              <path d="M232 262C228 300 230 350 236 420H330V262Z" fill="url(#svbNeckG)"/>
+              <path d="M232 262C228 300 230 350 236 420" fill="none" stroke="#1f2b27" stroke-width="3"/>
+              <path d="M234.5 268C231 302 233 350 239 420" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1"/>
+              <path d="M238 334C250 338 262 338 272 336" fill="none" stroke="#9fb2ab" stroke-width="1"/>
+              <path d="M218 262C238 276 262 284 292 292V312C262 304 238 296 218 282Z" fill="#26342f" opacity=".45" filter="url(#svbBlur)"/>
+
+              <!-- лицевая пластина (фарфор) -->
+              <path d="M234 30C216 98 212 140 214 172V206C211 222 213 244 218 262C238 276 262 284 292 292L360 296V30Z" fill="url(#svbSkin)"/>
+              <ellipse cx="264" cy="194" rx="28" ry="17" fill="url(#svbCheek)" opacity=".75"/>
+              <ellipse cx="268" cy="161" rx="17" ry="9" fill="#8ea39b" opacity=".35" filter="url(#svbBlur)"/>
+              <ellipse cx="250" cy="250" rx="34" ry="13" fill="#8ea39b" opacity=".28" filter="url(#svbBlur)" transform="rotate(24 250 250)"/>
+              <ellipse cx="244" cy="206" rx="18" ry="30" fill="#9db0a9" opacity=".22" filter="url(#svbBlur)"/>
+              <path d="M296 190C301 194 304 197 303 200" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" opacity=".9"/>
+              <path class="svb__seam" d="M231 40C213 98 209 140 211 172V206C208 222 210 244 215 263C235 277 259 285 280 289" fill="none" stroke="#6ff5bd" stroke-width="2" stroke-linejoin="round" filter="url(#svbGlow)" opacity=".75"/>
+              <path d="M234 40C216 98 212 140 214 172V206C211 222 213 244 218 262C238 276 262 284 282 287" fill="none" stroke="#17221e" stroke-width="5" stroke-linejoin="round"/>
+              <path d="M237 44C219 100 216 140 217.5 172V206C215 222 217 242 221.5 259" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width="1.2"/>
+              <!-- швы панелей -->
+              <g fill="none" stroke="#a5b8b1" stroke-width="1" stroke-linecap="round">
+                <path d="M244 176C256 186 270 189 283 187" opacity=".55"/>
+                <path d="M238 66C250 92 256 116 258 138" opacity=".7"/>
+                <path d="M228 236C242 248 258 258 274 266" opacity=".6"/>
+              </g>
+              <circle class="svb__led" cx="241" cy="124" r="2.2" fill="#7ff5c6" filter="url(#svbGlow)" style="--d:-.7s"/>
+            </g>
+
+            <!-- порт на месте уха -->
+            <g>
+              <circle cx="198" cy="188" r="21" fill="url(#svbMetal)" stroke="#0b1310" stroke-width="1.5"/>
+              <circle cx="198" cy="188" r="15" fill="#06110d"/>
+              <circle class="svb__ring" cx="198" cy="188" r="11" fill="none" stroke="#6ff5bd" stroke-width="3" stroke-dasharray="4.6 2.6" filter="url(#svbGlow)"/>
+              <circle class="svb__core" cx="198" cy="188" r="4" fill="#dfffee" filter="url(#svbGlow)"/>
+            </g>
+
+            <!-- глаз, бровь, нос, губы -->
+            <path d="M253 146C263 141.5 276 142 287 147.5" fill="none" stroke="#6f847d" stroke-width="2.2" stroke-linecap="round" opacity=".8"/>
+            <path d="M259 157C266 153 275 154 281 159.5C275 164 266 166 259 164.5C257 162 257 159 259 157Z" fill="#0a1d16"/>
+            <ellipse class="svb__iris" cx="276.5" cy="160" rx="2.7" ry="4.4" fill="#9bf8d4" filter="url(#svbGlow)"/>
+            <path class="svb__lid" d="M257 151C266 149 277 150 284 158.5C276 165 266 167 258 165.5C255.5 162 255.5 154 257 151Z" fill="#e6eeeb"/>
+            <path d="M255 156.5C263 151 275 151.5 283 159" fill="none" stroke="#24322d" stroke-width="2.3" stroke-linecap="round"/>
+            <path d="M276 154L280 150.2M279.5 155.6L285 152.4M282 157.6L288 155.6" stroke="#24322d" stroke-width="1.3" stroke-linecap="round"/>
+            <path d="M260 165C267 167 275 165 281 160.5" fill="none" stroke="#8a9c96" stroke-width="1"/>
+            <path d="M290 207.5C293 205.5 297 205.2 300 206" fill="none" stroke="#8a9c96" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M288 216C296 218 300 222 296 227L291 229C296 232 298 236 295 240C291 243 286 242 284 238C286 233 286 222 288 216Z" fill="url(#svbLip)" opacity=".8"/>
+            <path d="M283 229H291" stroke="#5e4442" stroke-width="1.2" stroke-linecap="round"/>
+            <path d="M291 220C294 221 296 223 295.5 225M291.5 233C294 234 295.5 236 294.5 238" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="1.1" stroke-linecap="round"/>
+            <circle cx="279" cy="158" r=".9" fill="#fff" opacity=".9"/>
+
+            <!-- стеклянный купол черепа -->
+            <path d="M128 240C106 210 104 172 110 146C118 102 148 66 194 54C212 50 226 50 236 52" fill="none" stroke="#e8fff6" stroke-opacity=".38" stroke-width="2"/>
+            <path d="M132 94C150 72 176 62 204 60" fill="none" stroke="#fff" stroke-opacity=".16" stroke-width="9" stroke-linecap="round"/>
+            <!-- «данные» из мозга -->
+            <g fill="#9bf8d4">
+              <rect class="svb__bit" x="148" y="74" width="3" height="3" style="--d:0s"/>
+              <rect class="svb__bit" x="176" y="68" width="2.5" height="2.5" style="--d:-1.2s"/>
+              <rect class="svb__bit" x="198" y="84" width="3" height="3" style="--d:-2.3s"/>
+              <rect class="svb__bit" x="130" y="98" width="2.5" height="2.5" style="--d:-.6s"/>
+              <rect class="svb__bit" x="162" y="62" width="2" height="2" style="--d:-3s"/>
+            </g>
+          </g>
+        </svg>
         <i class="orb__grade"></i><i class="orb__scan"></i><i class="orb__sweep"></i>
-        <i class="orb__eye" style="--x:45.6%;--y:37.1%"></i><i class="orb__eye" style="--x:61.3%;--y:35.9%"></i>
       </div>
       <div class="orb__ring orb__ring--1" aria-hidden="true"></div>
       <div class="orb__ring orb__ring--2"><div class="orb__spin" id="orbR2"></div></div>

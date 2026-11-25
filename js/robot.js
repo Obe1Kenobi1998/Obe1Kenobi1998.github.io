@@ -1410,7 +1410,7 @@
       var wr = new THREE.Group(); wr.position.set(-.205, 0, .02); wr.rotation.set(0, 0, .32); box.add(wr);
       var wh = new THREE.Mesh(blockGeo(.03, .19, .012, .004), steel); wh.position.y = .1; wr.add(wh);
       var wj = new THREE.Mesh(new THREE.TorusGeometry(.03, .012, 8, 18, PI * 1.5), steel); wj.position.y = .215; wj.rotation.z = PI * .75; wr.add(wj);
-      put(box, .6, .62, -.25, [.58, .4]);
+      put(box, -.5, -.62, .3, [.58, .4]);               // вне «коридора», где робот встаёт и идёт к камере (r ≈ .1….95, f > .15)
       // кружка
       var mug = new THREE.Group(), gold = std(0xd4a84b, { m: .55, r: .28, cc: 1 });
       var mb = new THREE.Mesh(new THREE.CylinderGeometry(.052, .047, .11, 32), gold); mb.position.y = .055; mug.add(mb);
@@ -1418,7 +1418,7 @@
       var mh = new THREE.Mesh(new THREE.TorusGeometry(.03, .009, 8, 20), gold); mh.position.set(.056, .058, 0); mug.add(mh);
       put(mug, -.55, 1.25, -.3, [.2, .2]);
       // значки на подставках, чуть откинуты назад
-      [["python", -1.0, 1.0, .25], ["js", .95, .12, -.3], ["csharp", -1.55, .28, .4], ["godot", -1.9, -.1, .45]].forEach(function (a) {
+      [["python", -1.0, 1.0, .25], ["js", .93, -.1, -.3], ["csharp", -1.55, .28, .4], ["godot", -1.9, -.1, .45]].forEach(function (a) {
         if (!ICONS[a[0]] || !window.appIconCanvas) return;
         var t = new THREE.CanvasTexture(window.appIconCanvas(a[0], 256)); t.encoding = THREE.sRGBEncoding; t.anisotropy = ANI;
         var g = new THREE.Group(), tilt = new THREE.Group(); tilt.rotation.x = -.2; g.add(tilt);

@@ -147,26 +147,41 @@ body.svcp{--ticker-h:0px;--bg:#eef3e7;--tx:#14261b;--tx2:#43594a;--tx3:#6c8072;-
 .svcp .footer__big{-webkit-text-stroke:1px #b9cfae;background-image:linear-gradient(90deg,#2f8f5b,#c7a74a)}
 .svcp .to-top:hover{color:var(--sv-acc)}
 
-/* центр орбиты: круглый портрет андроида (фото: Pexels, автор igovar — бесплатная лицензия Pexels).
-   Живёт за счёт js/service-robot.js: наклон за курсором и к значку под мышью, свечение глаз, моргание. */
+/* центр орбиты: девушка-андроид в профиль с мозгом-микросхемой — собственная SVG-иллюстрация (service.html).
+   Живёт за счёт CSS (импульсы по дорожкам, ядро, порт-«ухо», частицы) и js/service-robot.js (взгляд за курсором, моргание, «думает» при наведении на значок). */
 .orb__disc{position:absolute;left:50%;top:50%;width:calc(var(--S) * .7);height:calc(var(--S) * .7);margin:calc(var(--S) * -.35) 0 0 calc(var(--S) * -.35);
-  border-radius:50%;overflow:hidden;z-index:1;background:#0d2419;transform:perspective(900px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));
-  box-shadow:0 30px 60px rgba(20,52,34,.36),0 0 0 9px rgba(255,255,255,.42),0 0 46px 6px rgba(85,240,176,.28),inset 0 0 0 1px rgba(169,226,191,.25);will-change:transform}
-.orb__img{position:absolute;left:-5%;top:-5%;width:110%;height:110%;max-width:none;object-fit:cover;opacity:0;transition:opacity .8s ease;
-  transform:translate(var(--px,0px),var(--py,0px)) scale(1.02);filter:saturate(1.1) hue-rotate(-32deg) contrast(1.07) brightness(1.03)}
-.orb__disc.is-ready .orb__img{opacity:1}
-.orb__grade{position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(circle at 50% 40%,transparent 42%,rgba(8,34,22,.62) 100%),linear-gradient(180deg,rgba(40,140,90,.10),rgba(6,26,17,.38))}
-.orb__disc::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;box-shadow:inset 0 0 0 2px rgba(150,240,200,.35),inset 0 -30px 60px rgba(0,0,0,.3)}
-.orb__scan{position:absolute;inset:0;border-radius:50%;pointer-events:none;background:conic-gradient(from 0deg,transparent 0 300deg,rgba(130,240,190,.20) 352deg,transparent 360deg);animation:orbSpin 6s linear infinite;mix-blend-mode:screen}
-.orb__sweep{position:absolute;left:0;right:0;top:0;height:16%;pointer-events:none;mix-blend-mode:screen;opacity:0;
-  background:linear-gradient(180deg,transparent,rgba(120,255,200,.08) 40%,rgba(160,255,215,.55) 50%,rgba(120,255,200,.08) 60%,transparent);animation:orbSweep 5.5s ease-in-out infinite}
-@keyframes orbSweep{0%{transform:translateY(-120%);opacity:0}8%{opacity:1}42%{transform:translateY(640%);opacity:1}50%,100%{transform:translateY(640%);opacity:0}}
-.orb__eye{position:absolute;left:var(--x);top:var(--y);width:9%;height:9%;margin:-4.5% 0 0 -4.5%;border-radius:50%;pointer-events:none;mix-blend-mode:screen;
-  transform:translate(var(--px,0px),var(--py,0px));background:radial-gradient(circle,rgba(170,255,225,.95) 0 9%,rgba(80,240,175,.55) 22%,rgba(60,220,150,0) 66%);
-  animation:orbEye 2.6s ease-in-out infinite;transition:opacity .08s}
-.orb__disc.is-blink .orb__eye{opacity:0}
-@keyframes orbEye{50%{filter:brightness(1.35)}}
+  border-radius:50%;overflow:hidden;z-index:1;isolation:isolate;background:#071711;
+  box-shadow:0 30px 60px rgba(20,52,34,.36),0 0 0 9px rgba(255,255,255,.42),0 0 46px 6px rgba(85,240,176,.28),inset 0 0 0 1px rgba(169,226,191,.25)}
+.svb{position:absolute;inset:0;width:100%;height:100%;display:block}
+.svb__head{transform-box:view-box;transform-origin:215px 330px;transform:translate(var(--hx,0px),var(--hy,0px)) rotate(var(--tilt,0deg))}
+.svb__halo{opacity:.75;transition:opacity .5s}
+.svb__hair{transform-box:view-box;transform-origin:120px 170px;animation:svbHair 6s ease-in-out infinite}
+@keyframes svbHair{50%{transform:rotate(1.4deg)}}
+.svb__pl{stroke-dasharray:12 88;stroke-dashoffset:100;animation:svbPl var(--t,2.8s) linear infinite;animation-delay:var(--d,0s)}
+.svb__pl--hair{stroke-dasharray:8 92}
+@keyframes svbPl{to{stroke-dashoffset:0}}
+.svb__core{animation:svbCore 2.4s ease-in-out infinite}
+.svb__seam{animation:svbCx 3.4s ease-in-out infinite}
+@keyframes svbCore{50%{opacity:.55}}
+.svb__cortex{animation:svbCx 4.2s ease-in-out infinite}
+@keyframes svbCx{50%{opacity:.45}}
+.svb__ring{transform-box:fill-box;transform-origin:center;animation:orbSpin 7s linear infinite}
+.svb__iris{animation:svbIris 3s ease-in-out infinite}
+@keyframes svbIris{50%{opacity:.72}}
+.svb__lid{transform-box:fill-box;transform-origin:50% 0;transform:scaleY(0);transition:transform .07s ease-in}
+.orb__disc.is-blink .svb__lid{transform:scaleY(1)}
+.svb__led{animation:svbLed 1.8s steps(2,jump-none) infinite;animation-delay:var(--d,0s)}
+@keyframes svbLed{50%{opacity:.25}}
+.svb__bit{opacity:0;transform-box:fill-box;animation:svbBit 3.6s ease-in infinite;animation-delay:var(--d,0s)}
+@keyframes svbBit{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(-36px);opacity:0}}
+.orb__disc.is-think .svb__pl{animation-duration:1.15s}
+.orb__disc.is-think .svb__cortex,.orb__disc.is-think .svb__core{animation-duration:1.1s}
+.orb__disc.is-think .svb__halo{opacity:1}
+.orb__grade{position:absolute;inset:0;pointer-events:none;z-index:2;background:radial-gradient(circle at 50% 42%,transparent 50%,rgba(3,14,9,.55) 100%)}
+.orb__disc::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;z-index:3;box-shadow:inset 0 0 0 2px rgba(150,240,200,.35),inset 0 -30px 60px rgba(0,0,0,.3)}
+.orb__scan{position:absolute;inset:0;border-radius:50%;pointer-events:none;z-index:2;background:conic-gradient(from 0deg,transparent 0 300deg,rgba(130,240,190,.16) 352deg,transparent 360deg);animation:orbSpin 6s linear infinite;mix-blend-mode:screen}
+.orb__sweep{position:absolute;left:0;right:0;top:0;height:16%;pointer-events:none;z-index:2;mix-blend-mode:screen;opacity:0;
+  background:linear-gradient(180deg,transparent,rgba(120,255,200,.06) 40%,rgba(160,255,215,.4) 50%,rgba(120,255,200,.06) 60%,transparent);animation:orbSweep 6.5s ease-in-out infinite}
 
 /* ---------- адаптив ---------- */
 @media (max-width:1100px){
@@ -195,6 +210,7 @@ body.svcp{--ticker-h:0px;--bg:#eef3e7;--tx:#14261b;--tx2:#43594a;--tx3:#6c8072;-
   .sph__stats b{font-size:24px}
 }
 @media (prefers-reduced-motion:reduce){
-  .orb__spin,.orb__tile,.orb__glow,.orb__pulse path,.orb__scan,.orb__sweep,.orb__eye{animation:none}
+  .orb__spin,.orb__tile,.orb__glow,.orb__pulse path,.orb__scan,.orb__sweep,.svb *{animation:none}
+  .svb__pl{display:none}
   .orb__pulse path{stroke-dashoffset:0}
 }
