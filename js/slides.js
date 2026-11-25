@@ -26,6 +26,7 @@
     ["Я", "Яндекс и карты", "Добавлю сайт в Вебмастер и привяжу к карточке на Яндекс Картах."]
   ];
   if (reviews.length) {
+    flow.classList.add("is-reviews");
     document.getElementById("flowKicker").textContent = "05 / отзывы";
     document.getElementById("flowTitle").innerHTML = 'Что говорят <span class="shine">клиенты</span>';
     document.getElementById("flowSub").textContent = "Реальные отзывы людей, которым я сделал сайт или программу.";
@@ -35,9 +36,12 @@
   function reviewCard(r) {
     var stars = Math.max(0, Math.min(5, r.stars == null ? 5 : +r.stars));
     var ava = r.photo ? '<img class="fcard__ava" src="' + esc(r.photo) + '" alt="" loading="lazy">' : '<span class="fcard__ava fcard__ava--txt">' + esc(initials(r.name)) + "</span>";
+    var meta = [r.source, r.date].filter(Boolean).map(esc).join(" · ");
     return '<div class="fcard__head">' + ava + '<div><b>' + esc(r.name) + "</b><small>" + esc(r.role || "") + "</small></div></div>" +
-      '<div class="fcard__stars" aria-label="Оценка ' + stars + ' из 5">' + "★★★★★".slice(0, stars) + "<span>" + "★★★★★".slice(stars) + "</span></div>" +
-      '<p class="fcard__text">«' + esc(r.text) + "»</p>";
+      '<div class="fcard__row"><span class="fcard__stars" aria-label="Оценка ' + stars + ' из 5">' + "★★★★★".slice(0, stars) + "<span>" + "★★★★★".slice(stars) + "</span></span>" +
+      (meta ? '<span class="fcard__src">' + meta + "</span>" : "") + "</div>" +
+      '<p class="fcard__text">«' + esc(r.text) + "»</p>" +
+      (r.reply ? '<div class="fcard__reply"><b>Ответ ' + esc(S.name || "мастера") + "</b><span>" + esc(r.reply) + "</span></div>" : "");
   }
   function promiseCard(p, i) {
     return '<span class="fcard__ico">' + esc(p[0]) + '</span><b class="fcard__title">' + esc(p[1]) + "</b>" +
@@ -46,7 +50,7 @@
   var items = reviews.length ? reviews : PROMISES, n = items.length;
   var cards = items.map(function (it, i) {
     var el = document.createElement("article");
-    el.className = "fcard " + (reviews.length ? "fcard--review" : "fcard--promise fcard--v" + (i % 3));
+    el.className = "fcard " + (reviews.length ? "fcard--review" + (it.reply ? " fcard--replied" : "") : "fcard--promise fcard--v" + (i % 3));
     el.innerHTML = (reviews.length ? reviewCard(it) : promiseCard(it, i)) + '<i class="fcard__shade" aria-hidden="true"></i>';
     el.setAttribute("aria-roledescription", "слайд");
     stage.appendChild(el);
@@ -63,7 +67,7 @@
   // у центра чуть притормаживает (чтобы успеть прочитать), под мышью — медленнее, при перетаскивании
   // и фокусе с клавиатуры — стоит. Стрелки, точки и клавиши плавно доводят до карточки.
   var pos = 0, drag = null, hover = false, focused = false, inView = false, tw = null, spd = 0, last = 0;
-  var DRIFT = 1 / 6.5;                       // карточек в секунду (в среднем одна за ~7 с)
+  var DRIFT = 1 / 4.2;                       // карточек в секунду (в среднем одна за ~4–5 с)
   function wrapK(i, p) { var k = i - p; k = ((k % n) + n) % n; if (k > n / 2) k -= n; return k; }
   function layout(p) {
     var w = stage.clientWidth, cw = cards[0].offsetWidth || 300;
@@ -105,7 +109,7 @@
       if (k >= 1) tw = null;
     } else if (!reduce) {
       var f = Math.abs(pos - Math.round(pos)) * 2;              // 0 — карточка по центру, 1 — между карточками
-      var want = focused ? 0 : DRIFT * (hover ? .35 : 1) * (.35 + .65 * f) / .68;
+      var want = focused ? 0 : DRIFT * (hover ? .3 : 1) * (.35 + .65 * f) / .68;     // под мышью — заметно медленнее
       spd += (want - spd) * (1 - Math.exp(-3 * dt));            // плавный разгон и торможение
       if (spd > 1e-4) { pos += spd * dt; layout(pos); }
     }

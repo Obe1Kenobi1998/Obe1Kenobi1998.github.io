@@ -39,7 +39,16 @@
 .fcard__ava--txt{display:grid;place-items:center;font:700 16px var(--f-head);color:#16120a;background:linear-gradient(135deg,#f0cd73,#d4a84b)}
 .fcard__stars{position:relative;color:#d29c2c;letter-spacing:2px;font-size:16px}
 .fcard__stars span{color:var(--line2)}
-.fcard--review .fcard__text{display:-webkit-box;-webkit-line-clamp:8;-webkit-box-orient:vertical;overflow:hidden;color:var(--tx)}
+.fcard--review .fcard__text{display:-webkit-box;-webkit-line-clamp:7;-webkit-box-orient:vertical;overflow:hidden;color:var(--tx);font-size:15px}
+/* отзывы: карточка повыше, строка «звёзды · источник · дата», ответ мастера */
+.flow.is-reviews{height:500px}
+.fcard--review{width:330px;height:420px;gap:12px}
+.fcard--replied .fcard__text{-webkit-line-clamp:5}
+.fcard__row{position:relative;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.fcard__src{font:600 11.5px var(--f-body);color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fcard__reply{position:relative;margin-top:auto;padding:10px 12px;border-radius:12px;background:rgba(212,168,75,.12);border-left:3px solid var(--gold,#d4a84b);
+  font-size:13px;line-height:1.45;color:var(--tx2);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.fcard__reply b{display:block;font:700 12px var(--f-body);color:#9a6b17;margin-bottom:2px}
 
 .flow__nav{position:absolute;top:50%;z-index:200;width:50px;height:50px;margin-top:-25px;border-radius:50%;border:1px solid rgba(120,90,40,.2);cursor:pointer;
   font:400 28px/1 var(--f-body);color:var(--tx);background:rgba(255,253,249,.92);box-shadow:0 10px 26px rgba(92,70,30,.16);
