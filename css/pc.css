@@ -354,8 +354,8 @@
 .pccmp__act button{padding:.3em .6em;border-radius:.5em;border:1px solid var(--line2);background:none;color:var(--tx2);font:600 .82em var(--f-body);cursor:pointer}
 .pccmp__act button:hover{color:var(--gold2);border-color:var(--gold)}
 @container (max-width:620px){
-  .pcbar__marks{position:static;height:auto;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35em .8em;margin-top:.55em}
-  .pcbar__m,.pcbar__m.lo{position:static;transform:none!important;border:0!important;padding:0!important;text-align:left!important;white-space:normal}
+  .pcbar__marks{position:static;height:auto!important;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35em .8em;margin-top:.55em}
+  .pcbar__m,.pcbar__m.lo{position:static;top:auto!important;transform:none!important;border:0!important;padding:0!important;text-align:left!important;white-space:normal}
   .pcbar__m small{padding-left:1.7em}
   .pcgd__hero,.pcsum__perf{grid-template-columns:minmax(0,1fr)}
   .pcm__sys{display:none}

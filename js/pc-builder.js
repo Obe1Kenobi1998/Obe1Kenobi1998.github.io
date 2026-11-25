@@ -488,10 +488,16 @@
     var pct = function (v) { return Math.max(0, Math.min(100, v / max * 100)); };
     return '<div class="pcbar ' + cls + '"><div class="pcbar__track"><i style="width:' + pct(mine).toFixed(1) + '%"></i><b>' + esc(mineLbl) + "</b>" +
       marks.map(function (m, i) { return '<span class="pcbar__tick' + (m.ok ? " ok" : "") + '" style="left:' + pct(m.v).toFixed(1) + '%"><em>' + (i + 1) + "</em></span>"; }).join("") + "</div>" +
-      '<div class="pcbar__marks">' + marks.map(function (m, i) {
-        var p = pct(m.v), al = p < 12 ? "l" : p > 88 ? "r" : "c";
-        return '<span class="pcbar__m ' + al + (i % 2 ? " lo" : "") + (m.ok ? " ok" : "") + (m.v > max ? " far" : "") + '" style="left:' + p.toFixed(1) + '%"><b><i>' + (i + 1) + "</i>" + m.t + "</b><small>" + m.s + "</small></span>";
-      }).join("") + "</div>" + (note ? '<p class="pcbar__note">' + note + "</p>" : "") + "</div>";
+      (function () {                                        // подписи раскладываются по строкам без наложений
+        var ends = [], LW = 19, out = '', rows = 1;
+        marks.map(function (m, i) { return { m: m, i: i, p: pct(m.v) }; }).sort(function (x, y) { return x.p - y.p; }).forEach(function (o) {
+          var al = o.p > 80 ? 'r' : 'c', st = al === 'r' ? o.p - LW : o.p, en = al === 'r' ? o.p : o.p + LW, r = 0;
+          while (ends[r] != null && st < ends[r] + 1) r++;
+          ends[r] = en; rows = Math.max(rows, r + 1);
+          out += '<span class="pcbar__m ' + al + (o.m.ok ? ' ok' : '') + (o.m.v > max ? ' far' : '') + '" style="left:' + o.p.toFixed(1) + '%;top:' + (r * 2.3) + 'em"><b><i>' + (o.i + 1) + '</i>' + o.m.t + '</b><small>' + o.m.s + '</small></span>';
+        });
+        return '<div class="pcbar__marks" style="height:' + (rows * 2.3 + .3) + 'em">' + out + '</div>';
+      })() + (note ? '<p class="pcbar__note">' + note + "</p>" : "") + "</div>";
   }
   function gameHTML(g, forPrint) {
     var b = build, now = fpsFor(g, b, res, qual), vd = verdict(now.v), dm = demand(g), gs = gpuScore(b), gname = b.gpu ? b.gpu.chip : (b.cpu.ig || "встройка");
